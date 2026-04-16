@@ -1,1 +1,753 @@
-# RDV
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Bucagrans - Sistema RDV Profissional</title>
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
+
+```
+.header-sistema {
+    background: linear-gradient(135deg, #0a1f3d 0%, #1a3a6b 60%, #8b0000 100%);
+    color: white; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between;
+}
+.header-sistema h1 { font-size: 18px; letter-spacing: 1px; }
+.header-sistema p { font-size: 10px; opacity: 0.8; text-transform: uppercase; }
+
+.firebase-status {
+    display: flex; align-items: center; gap: 8px; font-size: 11px;
+    background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px;
+}
+.status-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #f39c12;
+    animation: pulse 1.5s infinite;
+}
+.status-dot.online { background: #27ae60; animation: none; }
+.status-dot.erro { background: #e74c3c; animation: none; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px 30px; }
+.card { border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid rgba(255,255,255,0.3); position: relative; }
+.c-azul { background: linear-gradient(135deg, #0a1f3d, #1a3a6b); }
+.c-vermelho { background: linear-gradient(135deg, #8b0000, #c0392b); }
+.c-verde { background: linear-gradient(135deg, #1a6b3a, #27ae60); }
+.card .num { font-size: 32px; font-weight: 800; display: block; }
+.card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.btn-ajuste { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; }
+.btn-ajuste:hover { background: rgba(255,255,255,0.4); }
+
+.search-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #8b0000; }
+.search-row { display: flex; gap: 15px; margin-top: 10px; }
+.input-busca { flex: 1; border: 1.5px solid #dce1e7; border-radius: 8px; padding: 12px 15px; outline: none; font-size: 14px; }
+.btn-gerar { background: #27ae60; color: white; border: none; border-radius: 8px; padding: 0 25px; font-weight: 700; cursor: pointer; font-size: 14px; }
+
+/* Histórico */
+.historico-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #1a3a6b; }
+.historico-titulo { font-weight: 700; color: #0a1f3d; margin-bottom: 12px; }
+.historico-lista { max-height: 200px; overflow-y: auto; }
+.historico-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;
+    background: #f8f9fa; font-size: 12px; border-left: 3px solid #1a3a6b;
+}
+.historico-item .rdv-num { font-weight: 800; color: #8b0000; font-size: 14px; }
+.historico-item .rdv-info { color: #555; }
+.historico-item .rdv-data { color: #888; font-size: 11px; }
+.historico-vazio { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
+
+/* Notificação toast */
+.toast {
+    position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+    background: #1a3a6b; color: white; padding: 14px 20px; border-radius: 10px;
+    font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+    max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.sucesso { background: #1a6b3a; }
+.toast.erro { background: #8b0000; }
+
+/* ===== DOCUMENTO RDV (FOLHA A4) ===== */
+#doc-container { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
+.folha-a4 {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    padding: 8mm 10mm;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+}
+.btn-imprimir { background: #8b0000; color: white; border: none; border-radius: 6px; padding: 12px 25px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+
+/* ===== TABELA PRINCIPAL ===== */
+.rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
+.rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
+.rdv-table input, .rdv-table select {
+    border: none; background: transparent; font-family: Arial, sans-serif;
+    font-size: 9px; outline: none; width: 100%; padding: 0;
+}
+
+.bg-amarelo     { background-color: #FFFF99; }
+.bg-azul-claro  { background-color: #DDEEFF; }
+.bg-azul-medio  { background-color: #BDD7EE; }
+.bg-cinza       { background-color: #D9D9D9; }
+.bg-laranja     { background-color: #FCE4D6; }
+.bg-verde       { background-color: #E2EFDA; }
+.bg-amarelo-escuro { background-color: #FFEB9C; }
+
+.td-empresa { text-align: center; font-weight: bold; font-size: 13px; padding: 6px; }
+.td-rdv-titulo { font-weight: bold; font-size: 11px; }
+.td-rdv-subtitulo { font-size: 7.5px; color: #555; }
+.td-num-rdv { font-weight: bold; font-size: 16px; color: #000; text-align: center; background-color: #FFFF99; }
+.lbl { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
+
+.td-categoria { font-weight: bold; font-size: 9px; text-align: center; background-color: #f9f9f9; width: 115px; vertical-align: middle; }
+.td-valor-input { background-color: #DDEEFF; padding: 0; }
+.td-valor-input input { text-align: right; padding: 2px 4px; height: 20px; background-color: #DDEEFF; }
+.td-total-cat { background-color: #BDD7EE; font-weight: bold; text-align: right; font-size: 9px; width: 88px; white-space: nowrap; padding: 3px 6px; }
+
+.td-soma-label { background-color: #1F4E79; color: white; font-weight: bold; font-size: 9px; text-align: left; padding: 4px 8px; }
+.td-soma-valor { background-color: #1F4E79; color: white; font-weight: bold; font-size: 11px; text-align: right; padding: 4px 8px; }
+
+.td-saldo-label { background-color: #FFFF99; font-weight: bold; font-size: 9px; }
+.td-saldo-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; }
+.td-saldo-desc  { background-color: #FFFF99; font-weight: bold; font-size: 9px; text-align: center; }
+
+.td-aviso { text-align: center; font-size: 8px; font-style: italic; padding: 4px; background-color: #f9f9f9; }
+
+.td-banco-titulo { font-weight: bold; font-size: 8.5px; text-align: center; background-color: #f0f0f0; }
+.td-banco-label  { font-size: 8px; font-weight: bold; background-color: #f9f9f9; width: 60px; }
+.td-banco-input  { background-color: #FFFF99; }
+.td-banco-input input { background-color: #FFFF99; font-size: 9px; }
+.td-conta-tipo   { font-size: 8px; font-weight: bold; text-align: center; background-color: #f0f0f0; }
+
+.td-declaracao { text-align: center; font-weight: bold; font-size: 8px; background-color: #D9D9D9; padding: 5px; }
+
+.ass-box { text-align: center; font-size: 8px; font-weight: bold; padding-top: 3px; }
+.ass-linha { border-top: 1px solid #000; padding-top: 3px; margin-top: 30px; font-size: 8px; text-align: center; }
+
+.td-adiant-label { background-color: #D9D9D9; font-weight: bold; font-size: 9px; padding: 5px 8px; }
+.td-adiant-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; padding: 5px 8px; }
+
+.rdv-table + .rdv-table { margin-top: -2px; }
+
+@media print {
+    body { background: white; padding: 0; margin: 0; }
+    .header-sistema, .cards, .search-area, .historico-area, .btn-imprimir, .toast { display: none !important; }
+    #doc-container { display: flex !important; padding: 0; }
+    .folha-a4 { box-shadow: none; width: 100%; padding: 8mm 10mm; margin: 0; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+</style>
+```
+
+</head>
+<body onload="init()">
+
+<!-- Firebase SDKs via CDN (modular compat) -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<div class="header-sistema">
+    <div>
+        <h1>BUCAGRANS</h1>
+        <p>PCH LEBON REGIS - CONTROLE DE RDV</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:20px;">
+        <div class="firebase-status">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-txt">Conectando...</span>
+        </div>
+        <div id="data-topo" style="font-weight: bold;">--/--/----</div>
+    </div>
+</div>
+
+<div class="cards">
+    <div class="card c-azul">
+        <button class="btn-ajuste" onclick="ajustarNumeroManual()">AJUSTAR</button>
+        <span class="num" id="card-rdv">---</span>
+        <span class="lbl">Nº RDV Atual</span>
+    </div>
+    <div class="card c-vermelho">
+        <span class="num" id="card-count">0</span>
+        <span class="lbl">RDVs Gerados</span>
+    </div>
+    <div class="card c-verde">
+        <span class="num" id="card-sync">☁</span>
+        <span class="lbl">Sincronizado na Nuvem</span>
+    </div>
+</div>
+
+<div class="search-area">
+    <p style="font-weight:700; color:#0a1f3d;">1. Localizar Funcionário</p>
+    <div class="search-row">
+        <input type="text" id="input-busca" class="input-busca" list="lista-func" placeholder="Digite o nome para buscar...">
+        <datalist id="lista-func"></datalist>
+        <button class="btn-gerar" onclick="prepararDoc()">GERAR RDV</button>
+    </div>
+</div>
+
+<!-- Histórico Firebase -->
+
+<div class="historico-area">
+    <p class="historico-titulo">📋 Histórico de RDVs (Firebase)</p>
+    <div class="historico-lista" id="historico-lista">
+        <div class="historico-vazio">Carregando histórico...</div>
+    </div>
+</div>
+
+<!-- Toast de notificação -->
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== DOCUMENTO RDV ===== -->
+
+<div id="doc-container">
+    <button class="btn-imprimir" onclick="finalizar()">🖨️ CONFIRMAR E IMPRIMIR</button>
+
+```
+<div class="folha-a4">
+    <table class="rdv-table">
+        <tr>
+            <td rowspan="2" style="width:95px; text-align:center; vertical-align:middle; padding:5px;">
+                <img src="logo-pch.png" style="max-width:82px; max-height:58px;">
+            </td>
+            <td colspan="6" style="text-align:center; font-size:14px; font-weight:bold; padding:8px 6px;">
+                BUCAGRANS CONSTRUTORA DE OBRAS S.A
+            </td>
+            <td style="vertical-align:top; padding:3px 6px; background:#FFFF99; width:75px;">
+                <div style="font-size:7.5px; font-weight:bold;">DATA:</div>
+                <input type="text" id="data-doc" style="background:#FFFF99; font-weight:bold; font-size:10px; border:none; outline:none; width:100%; margin-top:1px;">
+            </td>
+            <td rowspan="2" style="width:105px; vertical-align:middle; text-align:center; padding:5px; background:#FFFF99;">
+                <div style="font-size:7px; font-weight:bold; color:#333; line-height:1.4; margin-bottom:3px;">Nº RDV E<br>Nº DA OBRA</div>
+                <div style="font-size:19px; font-weight:bold; line-height:1.15;">
+                    <span id="txt-num-rdv">---</span>/26-63
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6" style="padding:4px 6px; vertical-align:middle;">
+                <div style="font-size:11px; font-weight:bold;">RDV - RELATÓRIO DE DESPESAS DE VIAGEM</div>
+                <div style="font-size:7px; color:#555; margin-top:2px;">PREENCHER TODOS OS CAMPOS EM AMARELO E LANÇAR OS VALORES NO CAMPO AZUL</div>
+            </td>
+            <td style="background:#FFFF99;"></td>
+        </tr>
+
+        <tr>
+            <td colspan="4" class="bg-amarelo"><span class="lbl">COLABORADOR:</span><input type="text" id="f-nome" readonly></td>
+            <td colspan="3" class="bg-amarelo"><span class="lbl">DESTINO:</span><input type="text" id="f-destino"></td>
+            <td colspan="2" style="background:white; border-left:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="bg-amarelo"><span class="lbl">SETOR/FUNÇÃO:</span><input type="text" id="f-setor" readonly></td>
+            <td colspan="3" class="bg-amarelo"><span class="lbl">CENTRO DE CUSTO:</span><input type="text" id="f-ccusto" readonly></td>
+            <td colspan="2" style="background:white; border-left:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="4" class="bg-amarelo"><span class="lbl">DATA VIAGEM:</span><input type="text" id="f-saida"></td>
+            <td colspan="3" class="bg-amarelo"><span class="lbl">DATA DO RETORNO:</span><input type="text" id="f-retorno"></td>
+            <td colspan="2" style="background:white; border-left:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="7" class="bg-amarelo"><span class="lbl">MOTIVO DA VIAGEM ou RDV:</span><input type="text" id="f-motivo"></td>
+            <td colspan="2" style="background:white; border-left:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="3" class="td-adiant-label">VALOR DO ADIANTAMENTO RECEBIDO:</td>
+            <td colspan="4" class="td-adiant-valor">
+                <input type="text" id="f-adiantamento" value="R$ 0,00"
+                    style="background:#FFFF99; font-weight:bold; font-size:11px; text-align:center;"
+                    oninput="calcularSaldo()">
+            </td>
+            <td colspan="2" style="background:white; border-left:none;"></td>
+        </tr>
+        <tr>
+            <td colspan="7" style="text-align:center; font-weight:bold; font-size:9px; background:#D9D9D9; padding:4px;">
+                DISCRIMINAÇÃO DAS DESPESAS POR GRUPO:
+            </td>
+            <td colspan="2" style="text-align:center; font-weight:bold; font-size:9px; background:#D9D9D9;">TOTAL</td>
+        </tr>
+    </table>
+
+    <table class="rdv-table" id="tabela-despesas" style="border-top:none; margin-top:-1px;">
+        <colgroup>
+            <col style="width:110px">
+            <col><col><col><col><col><col>
+            <col style="width:85px">
+        </colgroup>
+    </table>
+
+    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
+        <tr>
+            <td colspan="7" class="td-soma-label">SOMA TOTAL DE DESPESAS:</td>
+            <td id="val-geral" class="td-soma-valor" style="width:88px;">R$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="td-saldo-label" style="padding:4px 8px;">SALDO:</td>
+            <td colspan="2" class="td-saldo-valor"><input type="text" id="val-saldo" readonly style="background:#FFFF99; font-weight:bold; font-size:11px; text-align:center;"></td>
+            <td colspan="4" class="td-saldo-desc">Saldo A PAGAR para o COLABORADOR</td>
+        </tr>
+        <tr>
+            <td colspan="8" class="td-aviso">
+                Junto com essa RDV, deverá anexar todas as notas e recibos comprobatórios.
+            </td>
+        </tr>
+    </table>
+
+    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
+        <tr>
+            <td rowspan="5" style="width:28%; text-align:center; font-weight:bold; font-size:8.5px; vertical-align:middle; background:#f0f0f0;">
+                INFORMAR OS DADOS BANCÁRIOS E<br>PREFERNCIALMENTE A CHAVE PIX
+            </td>
+            <td class="td-banco-label">Banco</td>
+            <td class="td-banco-input"><input type="text" id="f-banco"></td>
+            <td rowspan="2" style="width:28%; text-align:center; font-size:8px; font-weight:bold; background:#f0f0f0; vertical-align:middle;">
+                INFORME ABAIXO SE É CONTA<br>CORRENTE OU POUPANÇA
+            </td>
+        </tr>
+        <tr>
+            <td class="td-banco-label">Agência</td>
+            <td class="td-banco-input"><input type="text" id="f-ag"></td>
+        </tr>
+        <tr>
+            <td class="td-banco-label">Conta</td>
+            <td class="td-banco-input"><input type="text" id="f-conta"></td>
+            <td rowspan="3" style="text-align:center; vertical-align:middle; font-size:8px; background:#FFFF99; font-weight:bold; padding:6px;">
+                <select id="f-tipo" style="background:#FFFF99; font-weight:bold; font-size:9px; text-align:center; border:none; outline:none; width:100%;">
+                    <option value="cc">CORRENTE</option>
+                    <option value="cp">POUPANÇA</option>
+                </select>
+                <div style="font-size:7px; margin-top:4px; color:#666;">Informe o tipo de conta no botão</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="td-banco-label">CPF</td>
+            <td class="td-banco-input"><input type="text" id="f-cpf"></td>
+        </tr>
+        <tr>
+            <td class="td-banco-label">PIX</td>
+            <td class="td-banco-input"><input type="text" id="f-pix"></td>
+        </tr>
+    </table>
+
+    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
+        <tr>
+            <td class="td-declaracao">
+                DECLARO HAVER RECEBIDO NESTA DATA AS DESPESAS DE VIAGEM ACIMA ESPECIFICADAS
+            </td>
+        </tr>
+    </table>
+
+    <div style="margin-top: 22px; font-family: Arial, sans-serif;">
+        <div style="display: flex; gap: 50px; padding: 0 20px; margin-bottom: 32px;">
+            <div style="flex: 0 0 36%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; padding-bottom: 3px; min-height: 20px;">
+                    <input type="text" id="f-data-ass"
+                        style="color:#c00; font-weight:bold; font-size:10px; width:100%;
+                               border:none; outline:none; background:transparent; font-family:Arial; text-align:center;">
+                </div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">DATA</div>
+            </div>
+            <div style="flex: 0 0 52%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 20px;"></div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 50px; padding: 0 20px;">
+            <div style="flex: 0 0 36%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; padding-bottom: 3px; min-height: 20px;
+                            font-size:9px; font-weight:bold; color:#000; text-align:center;">
+                    <span id="ass-nome"></span>
+                </div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
+            </div>
+            <div style="flex: 0 0 52%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 20px;"></div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">GESTOR ADM / FINANCEIRO</div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+<script>
+// =============================================
+// CONFIGURAÇÃO FIREBASE
+// =============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyDl0jgaPE86gMYfH1d56JlV293qi4vHoZ4",
+    authDomain: "rdv-s-40507.firebaseapp.com",
+    projectId: "rdv-s-40507",
+    storageBucket: "rdv-s-40507.firebasestorage.app",
+    messagingSenderId: "276888385688",
+    appId: "1:276888385688:web:a711cc3013e6975ef238ed"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db_fire = firebase.firestore();
+
+// Referências Firestore
+const configRef = db_fire.collection('config').doc('rdv_counter');
+const rdvsRef   = db_fire.collection('rdvs');
+
+// =============================================
+// BANCO DE FUNCIONÁRIOS
+// =============================================
+const db = [
+    { nome: "ADEMAR PAZ DE OLIVEIRA", setor: "PEDREIRO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "3775-3", conta: "20.315-7", cpf: "036.546.749-92", pix: "46 99919-9726", tipo: "cc" },
+    { nome: "ADEMILSON CEZAR DE OLIVEIRA", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "3081", conta: "104191", cpf: "022.041.439-44", pix: "022.041.439-44", tipo: "cc" },
+    { nome: "ALCIONE GOMES DA SILVA", setor: "SOLDADOR DE FORMA", tipoCc: "OPERACIONAL", banco: "BRADESCO", agencia: "1052-9", conta: "1001786-6", cpf: "025.545.953-05", pix: "025.545.953-05", tipo: "cp" },
+    { nome: "CARLOS SANTOS MEDEIROS DE SOUZA", setor: "SOLDADOR", tipoCc: "OPERACIONAL", banco: "CAIXA", agencia: "4523", conta: "9166-5", cpf: "971.101.082-87", pix: "971.101.082-87", tipo: "cp" },
+    { nome: "CLESIO DE CARVALHO COSTA", setor: "AJUDANTE GERAL", tipoCc: "ADMINISTRAÇÃO", banco: "ITAU", agencia: "6329", conta: "70093-1", cpf: "688.049.622-91", pix: "688.049.622-91", tipo: "cc" },
+    { nome: "CLODOALDO ZAPAVOSKI COUTINHO", setor: "ENC. TERRAPLANAGEM", tipoCc: "OPERACIONAL", banco: "SICREDI", agencia: "0.307", conta: "00045959-2", cpf: "916.351.879-15", pix: "916.351.879-15", tipo: "cc" },
+    { nome: "DILVAR SOARES", setor: "OPERADOR RETRO", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "4036", conta: "16425", cpf: "026.849.889-00", pix: "guarasoares82@gmail.com", tipo: "cc" },
+    { nome: "EDUARDO LUIS PIVA", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "1", conta: "53406518-0", cpf: "096.387.799-26", pix: "096.387.799-26", tipo: "cc" },
+    { nome: "ELERSON SOARES WEBER", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "1", conta: "11821435-0", cpf: "104.854.449-41", pix: "104.854.449-41", tipo: "cp" },
+    { nome: "EMANOEL LEONARDO MANGUEIRA DA SILVA", setor: "ELETRICISTA", tipoCc: "OPERACIONAL", banco: "SICREDI", agencia: "0727", conta: "60413-3", cpf: "035.125.342-44", pix: "035.125.342-44", tipo: "cc" },
+    { nome: "EQUIEL NATAN DA SILVA", setor: "ENCARREGADO DE RH", tipoCc: "ADMINISTRAÇÃO", banco: "NUBANK", agencia: "1", conta: "5925.7968-2", cpf: "106.269.829-01", pix: "106.269.829-01", tipo: "cc" },
+    { nome: "HELIEL KLEM", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "4095-9", conta: "10419-1", cpf: "044.576.939-44", pix: "044.576.939-44", tipo: "cc" },
+    { nome: "JOAO CARLOS FERNANDES", setor: "ENC. SESSAO TECNICA", tipoCc: "ADMINISTRAÇÃO", banco: "CAIXA", agencia: "0.391", conta: "580124312-3", cpf: "056.895.378-96", pix: "joaocarlos.seta@gmail.com", tipo: "cc" },
+    { nome: "JOAO PINTO DO NASCIMENTO", setor: "MOTORISTA COMBOIO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "8231-7", conta: "2980-7", cpf: "218.218.871-15", pix: "NÃO TEM", tipo: "cc" },
+    { nome: "JOAO ROBERTO BAIRROS", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "", conta: "", cpf: "899.481.739-53", pix: "(49)99837-5098", tipo: "cc" },
+    { nome: "JOSE DE LIMA CAMARGO", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "3857", conta: "86697-8", cpf: "989.550.129-34", pix: "989.550.129-34", tipo: "cc" },
+    { nome: "JOSE DHEIZOM MORAIS DA ROSA", setor: "COORD. SEGURANÇA", tipoCc: "ADMINISTRAÇÃO", banco: "BRASIL", agencia: "0.170", conta: "128737-0", cpf: "088.329.859-77", pix: "088.329.859-77", tipo: "cc" },
+    { nome: "JOSE JOSMAR FRANCA", setor: "MECANICO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "1154-1", conta: "31811-6", cpf: "386.719.722-91", pix: "josejosmar24@gmail.com", tipo: "cc" },
+    { nome: "JOSE ROGERIO FREITAS DA SILVA", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "", conta: "", cpf: "693.498.355-68", pix: "joserogeriojoserogerio11@gmail.com", tipo: "cc" },
+    { nome: "LUIZ HENRIQUE POLICENO ESCOBAR", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "PICPAY", agencia: "1", conta: "130961884-4", cpf: "125.457.209-09", pix: "(45) 99151-8090", tipo: "cp" },
+    { nome: "RAI GARAJAU DA SILVA", setor: "CARPINTEIRO", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "3027", conta: "64.606.193-3", cpf: "149.544.856-81", pix: "33999132151", tipo: "cp" },
+    { nome: "SIDNEI SIQUEIRA AVILA", setor: "ENC. CARPINTARIA", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "3764", conta: "32.643-9", cpf: "053.755.869-16", pix: "sidneisiqueiraavila@gmail.com", tipo: "cc" },
+    { nome: "TALISON MIGUEL DA SILVA", setor: "AJUDANTE GERAL", tipoCc: "ADMINISTRAÇÃO", banco: "NUBANK", agencia: "1", conta: "87810725-1", cpf: "514.431.188-18", pix: "talisonmiguel854@gmail.com", tipo: "cp" },
+    { nome: "VALDAIR ANTONIO MAIA DA SILVA", setor: "LIDER CARPINTARIA", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "4370", conta: "700053", cpf: "065.248.539-11", pix: "45 99981-6411", tipo: "cc" },
+    { nome: "WILLIAN DE CAMPOS PEREIRA", setor: "AJUDANTE", tipoCc: "OPERACIONAL", banco: "BRADESCO", agencia: "5706", conta: "18615-5", cpf: "154.099.669-70", pix: "willianpereiracampos@icloud.com", tipo: "cp" },
+    { nome: "MARCELO MARTON MAC FADDEN", setor: "ENGENHEIRO RESIDENTE", tipoCc: "ADMINISTRAÇÃO", banco: "BRASIL", agencia: "470-7", conta: "38117-9", cpf: "000.000.000-00", pix: "marcelo@email.com", tipo: "cc" },
+    { nome: "MARTIM VIEIRA DA SILVA ARAÚJO", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "SANTANDER", agencia: "", conta: "", cpf: "069.591.883-42", pix: "069.591.883-42", tipo: "cp" },
+    { nome: "ABMAEL VIEIRA DE ARAUJO", setor: "PEDREIRO", tipoCc: "OPERACIONAL" },
+    { nome: "ADALTON DE OLIVEIRA", setor: "OPERADOR CENTRAL", tipoCc: "OPERACIONAL" },
+    { nome: "GILBERTO SAMUELSSON", setor: "ENCARREGADO GERAL", tipoCc: "OPERACIONAL" }
+];
+
+const categorias = ["PASSAGENS","ALIMENTAÇÃO","ALIMENTAÇÃO","PEDÁGIO","HOSPEDAGEM","COMBUSTIVEL","TAXI","ESTACIONAMENTO","OUTROS"];
+
+// =============================================
+// FUNÇÕES UTILITÁRIAS
+// =============================================
+function mostrarToast(msg, tipo = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + tipo;
+    setTimeout(() => { t.className = 'toast'; }, 3500);
+}
+
+function setStatus(estado, texto) {
+    const dot = document.getElementById('status-dot');
+    const txt = document.getElementById('status-txt');
+    dot.className = 'status-dot ' + estado;
+    txt.textContent = texto;
+}
+
+// =============================================
+// FIRESTORE: CARREGAR ESTADO
+// =============================================
+async function carregarEstadoFirebase() {
+    try {
+        setStatus('', 'Conectando...');
+        const snap = await configRef.get();
+
+        let numAtual;
+        if (!snap.exists) {
+            // Primeiro uso: criar documento inicial
+            await configRef.set({ ultimoRDV: "066", totalGerados: 0 });
+            numAtual = "066";
+        } else {
+            numAtual = snap.data().ultimoRDV || "066";
+        }
+
+        document.getElementById('card-rdv').innerText  = numAtual;
+        document.getElementById('txt-num-rdv').innerText = numAtual;
+
+        // Contar RDVs gerados
+        const rdvsSnap = await rdvsRef.orderBy('criadoEm', 'desc').limit(50).get();
+        document.getElementById('card-count').innerText = rdvsSnap.size;
+        document.getElementById('card-sync').innerText  = '✓';
+
+        setStatus('online', 'Firebase Online');
+        renderizarHistorico(rdvsSnap);
+        mostrarToast('✅ Conectado ao Firebase com sucesso!', 'sucesso');
+
+    } catch (e) {
+        setStatus('erro', 'Erro de conexão');
+        mostrarToast('⚠️ Erro Firebase: ' + e.message, 'erro');
+        // Fallback para localStorage se Firebase falhar
+        const n = localStorage.getItem('ultimoRDV') || "066";
+        document.getElementById('card-rdv').innerText   = n;
+        document.getElementById('txt-num-rdv').innerText = n;
+        const usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
+        document.getElementById('card-count').innerText = usados.length;
+        document.getElementById('card-sync').innerText  = '✗';
+    }
+}
+
+// =============================================
+// FIRESTORE: RENDERIZAR HISTÓRICO
+// =============================================
+function renderizarHistorico(snap) {
+    const lista = document.getElementById('historico-lista');
+    if (snap.empty) {
+        lista.innerHTML = '<div class="historico-vazio">Nenhum RDV gerado ainda.</div>';
+        return;
+    }
+    lista.innerHTML = '';
+    snap.forEach(doc => {
+        const d = doc.data();
+        const dt = d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '--';
+        const item = document.createElement('div');
+        item.className = 'historico-item';
+        item.innerHTML = `
+            <span class="rdv-num">#${d.numero}</span>
+            <span class="rdv-info">${d.colaborador || '---'}</span>
+            <span class="rdv-data">${dt}</span>
+        `;
+        lista.appendChild(item);
+    });
+}
+
+// =============================================
+// FIRESTORE: SALVAR RDV
+// =============================================
+async function salvarRDVFirebase(numero, colaborador, setor, motivo) {
+    try {
+        await rdvsRef.add({
+            numero,
+            colaborador,
+            setor,
+            motivo,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const prox = String(parseInt(numero) + 1).padStart(3, '0');
+        await configRef.update({
+            ultimoRDV: prox,
+            totalGerados: firebase.firestore.FieldValue.increment(1)
+        });
+
+        mostrarToast(`✅ RDV #${numero} salvo na nuvem!`, 'sucesso');
+        return true;
+    } catch (e) {
+        mostrarToast('⚠️ Erro ao salvar no Firebase: ' + e.message, 'erro');
+        return false;
+    }
+}
+
+// =============================================
+// FIRESTORE: VERIFICAR SE RDV JÁ FOI USADO
+// =============================================
+async function rdvJaUsado(numero) {
+    try {
+        const snap = await rdvsRef.where('numero', '==', numero).get();
+        return !snap.empty;
+    } catch (e) {
+        // Fallback localStorage
+        const usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
+        return usados.includes(numero);
+    }
+}
+
+// =============================================
+// GERAR LINHAS DE DESPESAS
+// =============================================
+function gerarLinhasDespesas() {
+    const tbody = document.getElementById('tabela-despesas');
+    categorias.forEach((cat, idx) => {
+        const tr1 = document.createElement('tr');
+        tr1.classList.add('linha-despesa');
+        tr1.dataset.idx = idx;
+        tr1.innerHTML = `
+            <td class="td-categoria" rowspan="2">${cat}</td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-total-cat" id="total-cat-${idx}">R$&nbsp;&nbsp;&nbsp;-</td>
+        `;
+        tbody.appendChild(tr1);
+
+        const tr2 = document.createElement('tr');
+        tr2.classList.add('linha-despesa');
+        tr2.dataset.idx = idx;
+        tr2.innerHTML = `
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+            <td class="td-valor-input"><input type="text" oninput="somar(this)"></td>
+        `;
+        tbody.appendChild(tr2);
+    });
+}
+
+// =============================================
+// INICIALIZAÇÃO
+// =============================================
+async function init() {
+    gerarLinhasDespesas();
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('data-doc').value   = hoje;
+    document.getElementById('data-topo').innerText = hoje;
+    document.getElementById('f-data-ass').value = hoje;
+
+    // Popular datalist
+    const dl = document.getElementById('lista-func');
+    db.forEach(f => {
+        let o = document.createElement('option');
+        o.value = f.nome;
+        dl.appendChild(o);
+    });
+
+    // Carregar dados do Firebase
+    await carregarEstadoFirebase();
+}
+
+// =============================================
+// AJUSTE MANUAL DO NÚMERO RDV
+// =============================================
+async function ajustarNumeroManual() {
+    let novo = prompt("Digite o novo número sequencial do RDV (ex: 066):");
+    if (!novo) return;
+    let formatado = novo.padStart(3, '0');
+    try {
+        await configRef.update({ ultimoRDV: formatado });
+        mostrarToast(`Nº RDV atualizado para ${formatado} no Firebase`, 'sucesso');
+        setTimeout(() => location.reload(), 1500);
+    } catch (e) {
+        // Fallback localStorage
+        localStorage.setItem('ultimoRDV', formatado);
+        mostrarToast('Salvo localmente (Firebase indisponível)', 'erro');
+        location.reload();
+    }
+}
+
+// =============================================
+// PREPARAR DOCUMENTO
+// =============================================
+function prepararDoc() {
+    const nome = document.getElementById('input-busca').value;
+    const f = db.find(x => x.nome === nome);
+    if (!f) { alert("Selecione um nome válido na lista!"); return; }
+
+    document.getElementById('doc-container').style.display = 'flex';
+    document.getElementById('f-nome').value    = f.nome;
+    document.getElementById('f-setor').value   = f.setor;
+    document.getElementById('f-ccusto').value  = f.tipoCc;
+    document.getElementById('f-banco').value   = f.banco   || "";
+    document.getElementById('f-ag').value      = f.agencia || "";
+    document.getElementById('f-conta').value   = f.conta   || "";
+    document.getElementById('f-cpf').value     = f.cpf     || "";
+    document.getElementById('f-pix').value     = f.pix     || "";
+    document.getElementById('f-tipo').value    = f.tipo    || "cc";
+    document.getElementById('ass-nome').innerText = f.nome;
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+// =============================================
+// CÁLCULOS
+// =============================================
+function somar(el) {
+    const idx = el.closest('.linha-despesa').dataset.idx;
+    const linhas = document.querySelectorAll(`.linha-despesa[data-idx="${idx}"]`);
+    let t = 0;
+    linhas.forEach(tr => {
+        tr.querySelectorAll('input').forEach(i => {
+            let v = parseFloat(i.value.replace(',', '.'));
+            if (!isNaN(v)) t += v;
+        });
+    });
+    const fmtCat = t === 0
+        ? 'R$\u00a0\u00a0\u00a0-'
+        : 'R$\u00a0' + t.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById(`total-cat-${idx}`).innerText = fmtCat;
+    atualizarTotal();
+}
+
+function atualizarTotal() {
+    let g = 0;
+    categorias.forEach((_, idx) => {
+        const cel = document.getElementById(`total-cat-${idx}`);
+        const txt = cel.innerText.replace('R$', '').replace(/\./g, '').replace(',', '.').replace('-','0').trim();
+        g += parseFloat(txt) || 0;
+    });
+    const fmtG = g === 0
+        ? 'R$\u00a0\u00a0\u00a0\u00a0\u00a0-'
+        : 'R$\u00a0' + g.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('val-geral').innerText = fmtG;
+    calcularSaldo(g);
+}
+
+function calcularSaldo(totalDespesas) {
+    if (totalDespesas === undefined) {
+        let g = 0;
+        categorias.forEach((_, idx) => {
+            const cel = document.getElementById(`total-cat-${idx}`);
+            if (cel) {
+                const txt = cel.innerText.replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim();
+                g += parseFloat(txt) || 0;
+            }
+        });
+        totalDespesas = g;
+    }
+    const adiantTxt = document.getElementById('f-adiantamento').value
+        .replace('R$','').replace(/\./g,'').replace(',','.').trim();
+    const adiant = parseFloat(adiantTxt) || 0;
+    const saldo  = totalDespesas - adiant;
+    document.getElementById('val-saldo').value =
+        saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+// =============================================
+// FINALIZAR E IMPRIMIR (com Firebase)
+// =============================================
+async function finalizar() {
+    const num        = document.getElementById('txt-num-rdv').innerText;
+    const colaborador = document.getElementById('f-nome').value;
+    const setor      = document.getElementById('f-setor').value;
+    const motivo     = document.getElementById('f-motivo').value;
+
+    // Verificar duplicidade no Firestore
+    const jaUsado = await rdvJaUsado(num);
+    if (jaUsado) {
+        alert("⚠️ Este RDV nº " + num + " já foi registrado no sistema!");
+        return;
+    }
+
+    // Salvar no Firebase ANTES de imprimir
+    const salvo = await salvarRDVFirebase(num, colaborador, setor, motivo);
+
+    // Salvar também no localStorage como backup
+    let usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
+    if (!usados.includes(num)) {
+        usados.push(num);
+        localStorage.setItem('rdvsUsados', JSON.stringify(usados));
+    }
+    const prox = String(parseInt(num) + 1).padStart(3, '0');
+    localStorage.setItem('ultimoRDV', prox);
+
+    document.title = "RDV_" + num + "_" + colaborador.replace(/\s+/g, '_');
+    window.print();
+
+    setTimeout(() => location.reload(), 1000);
+}
+</script>
+
+</body>
+</html># RDV
