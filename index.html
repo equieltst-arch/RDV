@@ -11,144 +11,138 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
 
 ```
-.header-sistema {
-    background: linear-gradient(135deg, #0a1f3d 0%, #1a3a6b 60%, #8b0000 100%);
-    color: white; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between;
-}
-.header-sistema h1 { font-size: 18px; letter-spacing: 1px; }
-.header-sistema p { font-size: 10px; opacity: 0.8; text-transform: uppercase; }
+    .header-sistema {
+        background: linear-gradient(135deg, #0a1f3d 0%, #1a3a6b 60%, #8b0000 100%);
+        color: white; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .header-sistema h1 { font-size: 18px; letter-spacing: 1px; }
+    .header-sistema p { font-size: 10px; opacity: 0.8; text-transform: uppercase; }
 
-.firebase-status {
-    display: flex; align-items: center; gap: 8px; font-size: 11px;
-    background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px;
-}
-.status-dot {
-    width: 8px; height: 8px; border-radius: 50%; background: #f39c12;
-    animation: pulse 1.5s infinite;
-}
-.status-dot.online { background: #27ae60; animation: none; }
-.status-dot.erro { background: #e74c3c; animation: none; }
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .firebase-status {
+        display: flex; align-items: center; gap: 8px; font-size: 11px;
+        background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px;
+    }
+    .status-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #f39c12;
+        animation: pulse 1.5s infinite;
+    }
+    .status-dot.online { background: #27ae60; animation: none; }
+    .status-dot.erro { background: #e74c3c; animation: none; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
 
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px 30px; }
-.card { border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid rgba(255,255,255,0.3); position: relative; }
-.c-azul { background: linear-gradient(135deg, #0a1f3d, #1a3a6b); }
-.c-vermelho { background: linear-gradient(135deg, #8b0000, #c0392b); }
-.c-verde { background: linear-gradient(135deg, #1a6b3a, #27ae60); }
-.card .num { font-size: 32px; font-weight: 800; display: block; }
-.card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; }
-.btn-ajuste { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; }
-.btn-ajuste:hover { background: rgba(255,255,255,0.4); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px 30px; }
+    .card { border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid rgba(255,255,255,0.3); position: relative; }
+    .c-azul { background: linear-gradient(135deg, #0a1f3d, #1a3a6b); }
+    .c-vermelho { background: linear-gradient(135deg, #8b0000, #c0392b); }
+    .c-verde { background: linear-gradient(135deg, #1a6b3a, #27ae60); }
+    .card .num { font-size: 32px; font-weight: 800; display: block; }
+    .card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .btn-ajuste { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; }
+    .btn-ajuste:hover { background: rgba(255,255,255,0.4); }
 
-.search-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #8b0000; }
-.search-row { display: flex; gap: 15px; margin-top: 10px; }
-.input-busca { flex: 1; border: 1.5px solid #dce1e7; border-radius: 8px; padding: 12px 15px; outline: none; font-size: 14px; }
-.btn-gerar { background: #27ae60; color: white; border: none; border-radius: 8px; padding: 0 25px; font-weight: 700; cursor: pointer; font-size: 14px; }
+    .search-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #8b0000; }
+    .search-row { display: flex; gap: 15px; margin-top: 10px; }
+    .input-busca { flex: 1; border: 1.5px solid #dce1e7; border-radius: 8px; padding: 12px 15px; outline: none; font-size: 14px; }
+    .btn-gerar { background: #27ae60; color: white; border: none; border-radius: 8px; padding: 0 25px; font-weight: 700; cursor: pointer; font-size: 14px; }
 
-/* Histórico */
-.historico-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #1a3a6b; }
-.historico-titulo { font-weight: 700; color: #0a1f3d; margin-bottom: 12px; }
-.historico-lista { max-height: 200px; overflow-y: auto; }
-.historico-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;
-    background: #f8f9fa; font-size: 12px; border-left: 3px solid #1a3a6b;
-}
-.historico-item .rdv-num { font-weight: 800; color: #8b0000; font-size: 14px; }
-.historico-item .rdv-info { color: #555; }
-.historico-item .rdv-data { color: #888; font-size: 11px; }
-.historico-vazio { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
+    .historico-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #1a3a6b; }
+    .historico-titulo { font-weight: 700; color: #0a1f3d; margin-bottom: 12px; }
+    .historico-lista { max-height: 200px; overflow-y: auto; }
+    .historico-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 8px 12px; border-radius: 6px; margin-bottom: 4px;
+        background: #f8f9fa; font-size: 12px; border-left: 3px solid #1a3a6b;
+    }
+    .historico-item .rdv-num { font-weight: 800; color: #8b0000; font-size: 14px; }
+    .historico-item .rdv-info { color: #555; }
+    .historico-item .rdv-data { color: #888; font-size: 11px; }
+    .historico-vazio { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
 
-/* Notificação toast */
-.toast {
-    position: fixed; bottom: 30px; right: 30px; z-index: 9999;
-    background: #1a3a6b; color: white; padding: 14px 20px; border-radius: 10px;
-    font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
-    max-width: 320px;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
-.toast.sucesso { background: #1a6b3a; }
-.toast.erro { background: #8b0000; }
+    .toast {
+        position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+        background: #1a3a6b; color: white; padding: 14px 20px; border-radius: 10px;
+        font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        transform: translateY(100px); opacity: 0; transition: all 0.3s ease;
+        max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.sucesso { background: #1a6b3a; }
+    .toast.erro { background: #8b0000; }
 
-/* ===== DOCUMENTO RDV (FOLHA A4) ===== */
-#doc-container { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
-.folha-a4 {
-    width: 210mm;
-    min-height: 297mm;
-    background: white;
-    padding: 8mm 10mm;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    box-sizing: border-box;
-}
-.btn-imprimir { background: #8b0000; color: white; border: none; border-radius: 6px; padding: 12px 25px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+    #doc-container { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
+    .folha-a4 {
+        width: 210mm;
+        min-height: 297mm;
+        background: white;
+        padding: 8mm 10mm;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        box-sizing: border-box;
+    }
+    .btn-imprimir { background: #8b0000; color: white; border: none; border-radius: 6px; padding: 12px 25px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
 
-/* ===== TABELA PRINCIPAL ===== */
-.rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
-.rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
-.rdv-table input, .rdv-table select {
-    border: none; background: transparent; font-family: Arial, sans-serif;
-    font-size: 9px; outline: none; width: 100%; padding: 0;
-}
+    .rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
+    .rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
+    .rdv-table input, .rdv-table select {
+        border: none; background: transparent; font-family: Arial, sans-serif;
+        font-size: 9px; outline: none; width: 100%; padding: 0;
+    }
 
-.bg-amarelo     { background-color: #FFFF99; }
-.bg-azul-claro  { background-color: #DDEEFF; }
-.bg-azul-medio  { background-color: #BDD7EE; }
-.bg-cinza       { background-color: #D9D9D9; }
-.bg-laranja     { background-color: #FCE4D6; }
-.bg-verde       { background-color: #E2EFDA; }
-.bg-amarelo-escuro { background-color: #FFEB9C; }
+    .bg-amarelo     { background-color: #FFFF99; }
+    .bg-azul-claro  { background-color: #DDEEFF; }
+    .bg-azul-medio  { background-color: #BDD7EE; }
+    .bg-cinza       { background-color: #D9D9D9; }
+    .bg-laranja     { background-color: #FCE4D6; }
+    .bg-verde       { background-color: #E2EFDA; }
+    .bg-amarelo-escuro { background-color: #FFEB9C; }
 
-.td-empresa { text-align: center; font-weight: bold; font-size: 13px; padding: 6px; }
-.td-rdv-titulo { font-weight: bold; font-size: 11px; }
-.td-rdv-subtitulo { font-size: 7.5px; color: #555; }
-.td-num-rdv { font-weight: bold; font-size: 16px; color: #000; text-align: center; background-color: #FFFF99; }
-.lbl { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
+    .td-empresa { text-align: center; font-weight: bold; font-size: 13px; padding: 6px; }
+    .td-rdv-titulo { font-weight: bold; font-size: 11px; }
+    .td-rdv-subtitulo { font-size: 7.5px; color: #555; }
+    .td-num-rdv { font-weight: bold; font-size: 16px; color: #000; text-align: center; background-color: #FFFF99; }
+    .lbl { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
 
-.td-categoria { font-weight: bold; font-size: 9px; text-align: center; background-color: #f9f9f9; width: 115px; vertical-align: middle; }
-.td-valor-input { background-color: #DDEEFF; padding: 0; }
-.td-valor-input input { text-align: right; padding: 2px 4px; height: 20px; background-color: #DDEEFF; }
-.td-total-cat { background-color: #BDD7EE; font-weight: bold; text-align: right; font-size: 9px; width: 88px; white-space: nowrap; padding: 3px 6px; }
+    .td-categoria { font-weight: bold; font-size: 9px; text-align: center; background-color: #f9f9f9; width: 115px; vertical-align: middle; }
+    .td-valor-input { background-color: #DDEEFF; padding: 0; }
+    .td-valor-input input { text-align: right; padding: 2px 4px; height: 20px; background-color: #DDEEFF; }
+    .td-total-cat { background-color: #BDD7EE; font-weight: bold; text-align: right; font-size: 9px; width: 88px; white-space: nowrap; padding: 3px 6px; }
 
-.td-soma-label { background-color: #1F4E79; color: white; font-weight: bold; font-size: 9px; text-align: left; padding: 4px 8px; }
-.td-soma-valor { background-color: #1F4E79; color: white; font-weight: bold; font-size: 11px; text-align: right; padding: 4px 8px; }
+    .td-soma-label { background-color: #1F4E79; color: white; font-weight: bold; font-size: 9px; text-align: left; padding: 4px 8px; }
+    .td-soma-valor { background-color: #1F4E79; color: white; font-weight: bold; font-size: 11px; text-align: right; padding: 4px 8px; }
 
-.td-saldo-label { background-color: #FFFF99; font-weight: bold; font-size: 9px; }
-.td-saldo-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; }
-.td-saldo-desc  { background-color: #FFFF99; font-weight: bold; font-size: 9px; text-align: center; }
+    .td-saldo-label { background-color: #FFFF99; font-weight: bold; font-size: 9px; }
+    .td-saldo-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; }
+    .td-saldo-desc  { background-color: #FFFF99; font-weight: bold; font-size: 9px; text-align: center; }
 
-.td-aviso { text-align: center; font-size: 8px; font-style: italic; padding: 4px; background-color: #f9f9f9; }
+    .td-aviso { text-align: center; font-size: 8px; font-style: italic; padding: 4px; background-color: #f9f9f9; }
 
-.td-banco-titulo { font-weight: bold; font-size: 8.5px; text-align: center; background-color: #f0f0f0; }
-.td-banco-label  { font-size: 8px; font-weight: bold; background-color: #f9f9f9; width: 60px; }
-.td-banco-input  { background-color: #FFFF99; }
-.td-banco-input input { background-color: #FFFF99; font-size: 9px; }
-.td-conta-tipo   { font-size: 8px; font-weight: bold; text-align: center; background-color: #f0f0f0; }
+    .td-banco-titulo { font-weight: bold; font-size: 8.5px; text-align: center; background-color: #f0f0f0; }
+    .td-banco-label  { font-size: 8px; font-weight: bold; background-color: #f9f9f9; width: 60px; }
+    .td-banco-input  { background-color: #FFFF99; }
+    .td-banco-input input { background-color: #FFFF99; font-size: 9px; }
+    .td-conta-tipo   { font-size: 8px; font-weight: bold; text-align: center; background-color: #f0f0f0; }
 
-.td-declaracao { text-align: center; font-weight: bold; font-size: 8px; background-color: #D9D9D9; padding: 5px; }
+    .td-declaracao { text-align: center; font-weight: bold; font-size: 8px; background-color: #D9D9D9; padding: 5px; }
 
-.ass-box { text-align: center; font-size: 8px; font-weight: bold; padding-top: 3px; }
-.ass-linha { border-top: 1px solid #000; padding-top: 3px; margin-top: 30px; font-size: 8px; text-align: center; }
+    .ass-box { text-align: center; font-size: 8px; font-weight: bold; padding-top: 3px; }
+    .ass-linha { border-top: 1px solid #000; padding-top: 3px; margin-top: 30px; font-size: 8px; text-align: center; }
 
-.td-adiant-label { background-color: #D9D9D9; font-weight: bold; font-size: 9px; padding: 5px 8px; }
-.td-adiant-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; padding: 5px 8px; }
+    .td-adiant-label { background-color: #D9D9D9; font-weight: bold; font-size: 9px; padding: 5px 8px; }
+    .td-adiant-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; padding: 5px 8px; }
 
-.rdv-table + .rdv-table { margin-top: -2px; }
+    .rdv-table + .rdv-table { margin-top: -2px; }
 
-@media print {
-    body { background: white; padding: 0; margin: 0; }
-    .header-sistema, .cards, .search-area, .historico-area, .btn-imprimir, .toast { display: none !important; }
-    #doc-container { display: flex !important; padding: 0; }
-    .folha-a4 { box-shadow: none; width: 100%; padding: 8mm 10mm; margin: 0; }
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-}
+    @media print {
+        body { background: white; padding: 0; margin: 0; }
+        .header-sistema, .cards, .search-area, .historico-area, .btn-imprimir, .toast { display: none !important; }
+        #doc-container { display: flex !important; padding: 0; }
+        .folha-a4 { box-shadow: none; width: 100%; padding: 8mm 10mm; margin: 0; }
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    }
 </style>
 ```
 
 </head>
 <body onload="init()">
-
-<!-- Firebase SDKs via CDN (modular compat) -->
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 
@@ -193,16 +187,12 @@
     </div>
 </div>
 
-<!-- Histórico Firebase -->
-
 <div class="historico-area">
     <p class="historico-titulo">📋 Histórico de RDVs (Firebase)</p>
     <div class="historico-lista" id="historico-lista">
         <div class="historico-vazio">Carregando histórico...</div>
     </div>
 </div>
-
-<!-- Toast de notificação -->
 
 <div class="toast" id="toast"></div>
 
@@ -345,10 +335,13 @@
         </tr>
     </table>
 
+    <!-- ===== ÁREA DE ASSINATURAS (CORRIGIDA) ===== -->
     <div style="margin-top: 22px; font-family: Arial, sans-serif;">
+        <!-- Linha 1: DATA + RH/SUPERVISOR -->
         <div style="display: flex; gap: 50px; padding: 0 20px; margin-bottom: 32px;">
             <div style="flex: 0 0 36%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; padding-bottom: 3px; min-height: 20px;">
+                <div style="border-bottom: 1px solid #000; min-height: 28px;
+                            font-size:10px; font-weight:bold; color:#c00; text-align:center; padding-bottom:3px;">
                     <input type="text" id="f-data-ass"
                         style="color:#c00; font-weight:bold; font-size:10px; width:100%;
                                border:none; outline:none; background:transparent; font-family:Arial; text-align:center;">
@@ -356,20 +349,24 @@
                 <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">DATA</div>
             </div>
             <div style="flex: 0 0 52%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 20px;"></div>
+                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
                 <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
             </div>
         </div>
+
+        <!-- Linha 2: COLABORADOR (nome abaixo da linha) + GESTOR -->
         <div style="display: flex; gap: 50px; padding: 0 20px;">
             <div style="flex: 0 0 36%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; padding-bottom: 3px; min-height: 20px;
-                            font-size:9px; font-weight:bold; color:#000; text-align:center;">
+                <!-- Linha limpa para assinar -->
+                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
+                <!-- Nome ABAIXO da linha -->
+                <div style="font-size:9px; font-weight:bold; color:#000; text-align:center; margin-top:3px;">
                     <span id="ass-nome"></span>
                 </div>
-                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:1px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
             </div>
             <div style="flex: 0 0 52%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 20px;"></div>
+                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
                 <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">GESTOR ADM / FINANCEIRO</div>
             </div>
         </div>
@@ -395,7 +392,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db_fire = firebase.firestore();
 
-// Referências Firestore
 const configRef = db_fire.collection('config').doc('rdv_counter');
 const rdvsRef   = db_fire.collection('rdvs');
 
@@ -437,8 +433,6 @@ const db = [
     { nome: "ADALTON DE OLIVEIRA", setor: "OPERADOR CENTRAL", tipoCc: "OPERACIONAL" },
     { nome: "GILBERTO SAMUELSSON", setor: "ENCARREGADO GERAL", tipoCc: "OPERACIONAL" },
     { nome: "GUILBER KAIRON CAMARGO", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "PIC PAY", agencia: "0001", conta: "90849858-6", cpf: "088.773.129-55", pix: "088.773.129-55", tipo: "cc" },
-    
-    
 ];
 
 const categorias = ["PASSAGENS","ALIMENTAÇÃO","ALIMENTAÇÃO","PEDÁGIO","HOSPEDAGEM","COMBUSTIVEL","TAXI","ESTACIONAMENTO","OUTROS"];
@@ -470,17 +464,15 @@ async function carregarEstadoFirebase() {
 
         let numAtual;
         if (!snap.exists) {
-            // Primeiro uso: criar documento inicial
             await configRef.set({ ultimoRDV: "066", totalGerados: 0 });
             numAtual = "066";
         } else {
             numAtual = snap.data().ultimoRDV || "066";
         }
 
-        document.getElementById('card-rdv').innerText  = numAtual;
+        document.getElementById('card-rdv').innerText   = numAtual;
         document.getElementById('txt-num-rdv').innerText = numAtual;
 
-        // Contar RDVs gerados
         const rdvsSnap = await rdvsRef.orderBy('criadoEm', 'desc').limit(50).get();
         document.getElementById('card-count').innerText = rdvsSnap.size;
         document.getElementById('card-sync').innerText  = '✓';
@@ -492,9 +484,8 @@ async function carregarEstadoFirebase() {
     } catch (e) {
         setStatus('erro', 'Erro de conexão');
         mostrarToast('⚠️ Erro Firebase: ' + e.message, 'erro');
-        // Fallback para localStorage se Firebase falhar
         const n = localStorage.getItem('ultimoRDV') || "066";
-        document.getElementById('card-rdv').innerText   = n;
+        document.getElementById('card-rdv').innerText    = n;
         document.getElementById('txt-num-rdv').innerText = n;
         const usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
         document.getElementById('card-count').innerText = usados.length;
@@ -561,7 +552,6 @@ async function rdvJaUsado(numero) {
         const snap = await rdvsRef.where('numero', '==', numero).get();
         return !snap.empty;
     } catch (e) {
-        // Fallback localStorage
         const usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
         return usados.includes(numero);
     }
@@ -609,11 +599,10 @@ function gerarLinhasDespesas() {
 async function init() {
     gerarLinhasDespesas();
     const hoje = new Date().toLocaleDateString('pt-BR');
-    document.getElementById('data-doc').value   = hoje;
+    document.getElementById('data-doc').value    = hoje;
     document.getElementById('data-topo').innerText = hoje;
-    document.getElementById('f-data-ass').value = hoje;
+    document.getElementById('f-data-ass').value  = hoje;
 
-    // Popular datalist
     const dl = document.getElementById('lista-func');
     db.forEach(f => {
         let o = document.createElement('option');
@@ -621,7 +610,6 @@ async function init() {
         dl.appendChild(o);
     });
 
-    // Carregar dados do Firebase
     await carregarEstadoFirebase();
 }
 
@@ -637,7 +625,6 @@ async function ajustarNumeroManual() {
         mostrarToast(`Nº RDV atualizado para ${formatado} no Firebase`, 'sucesso');
         setTimeout(() => location.reload(), 1500);
     } catch (e) {
-        // Fallback localStorage
         localStorage.setItem('ultimoRDV', formatado);
         mostrarToast('Salvo localmente (Firebase indisponível)', 'erro');
         location.reload();
@@ -724,22 +711,19 @@ function calcularSaldo(totalDespesas) {
 // FINALIZAR E IMPRIMIR (com Firebase)
 // =============================================
 async function finalizar() {
-    const num        = document.getElementById('txt-num-rdv').innerText;
+    const num         = document.getElementById('txt-num-rdv').innerText;
     const colaborador = document.getElementById('f-nome').value;
-    const setor      = document.getElementById('f-setor').value;
-    const motivo     = document.getElementById('f-motivo').value;
+    const setor       = document.getElementById('f-setor').value;
+    const motivo      = document.getElementById('f-motivo').value;
 
-    // Verificar duplicidade no Firestore
     const jaUsado = await rdvJaUsado(num);
     if (jaUsado) {
         alert("⚠️ Este RDV nº " + num + " já foi registrado no sistema!");
         return;
     }
 
-    // Salvar no Firebase ANTES de imprimir
     const salvo = await salvarRDVFirebase(num, colaborador, setor, motivo);
 
-    // Salvar também no localStorage como backup
     let usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
     if (!usados.includes(num)) {
         usados.push(num);
