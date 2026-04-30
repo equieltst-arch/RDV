@@ -2,1093 +2,1666 @@
 
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Bucagrans - Sistema RDV Profissional</title>
-    <style>
-        @page { size: A4; margin: 0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; color: #333; }
-
-```
-    .header-sistema {
-        background: linear-gradient(135deg, #0a1f3d 0%, #1a3a6b 60%, #8b0000 100%);
-        color: white; padding: 15px 30px; display: flex; align-items: center; justify-content: space-between;
-    }
-    .header-sistema h1 { font-size: 18px; letter-spacing: 1px; }
-    .header-sistema p { font-size: 10px; opacity: 0.8; text-transform: uppercase; }
-
-    .firebase-status {
-        display: flex; align-items: center; gap: 8px; font-size: 11px;
-        background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px;
-    }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #f39c12; animation: pulse 1.5s infinite; }
-    .status-dot.online { background: #27ae60; animation: none; }
-    .status-dot.erro { background: #e74c3c; animation: none; }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
-
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; padding: 20px 30px; }
-    .card { border-radius: 12px; padding: 20px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 5px solid rgba(255,255,255,0.3); position: relative; }
-    .c-azul { background: linear-gradient(135deg, #0a1f3d, #1a3a6b); }
-    .c-vermelho { background: linear-gradient(135deg, #8b0000, #c0392b); }
-    .c-verde { background: linear-gradient(135deg, #1a6b3a, #27ae60); }
-    .c-roxo { background: linear-gradient(135deg, #4a1a6b, #7c3aed); }
-    .card .num { font-size: 32px; font-weight: 800; display: block; }
-    .card .lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; }
-    .btn-ajuste { position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; }
-    .btn-ajuste:hover { background: rgba(255,255,255,0.4); }
-
-    .search-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #8b0000; }
-    .search-row { display: flex; gap: 15px; margin-top: 10px; }
-    .input-busca { flex: 1; border: 1.5px solid #dce1e7; border-radius: 8px; padding: 12px 15px; outline: none; font-size: 14px; }
-    .btn-gerar { background: #27ae60; color: white; border: none; border-radius: 8px; padding: 0 25px; font-weight: 700; cursor: pointer; font-size: 14px; }
-    .btn-novo-func { background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 0 20px; font-weight: 700; cursor: pointer; font-size: 13px; white-space: nowrap; }
-    .btn-novo-func:hover { background: #6d28d9; }
-    .btn-gerar:hover { background: #219a52; }
-
-    .historico-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #1a3a6b; }
-    .historico-titulo { font-weight: 700; color: #0a1f3d; margin-bottom: 12px; }
-    .historico-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .btn-apagar-hist { background: #8b0000; color: white; border: none; border-radius: 6px; padding: 5px 14px; font-size: 11px; font-weight: 700; cursor: pointer; }
-    .btn-apagar-hist:hover { background: #c0392b; }
-    .historico-lista { max-height: 200px; overflow-y: auto; }
-    .historico-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: #f8f9fa; font-size: 12px; border-left: 3px solid #1a3a6b; flex-wrap: wrap; gap: 4px; }
-    .historico-item .rdv-num { font-weight: 800; color: #8b0000; font-size: 14px; min-width: 50px; }
-    .historico-item .rdv-info { color: #333; font-weight: 600; flex: 1; }
-    .historico-item .rdv-data { color: #888; font-size: 11px; }
-    .historico-item .rdv-valor { font-weight: 800; color: #1a6b3a; font-size: 13px; background: #e8f8ee; padding: 2px 8px; border-radius: 10px; }
-    .historico-item .rdv-saldo-neg { font-weight: 800; color: #8b0000; font-size: 12px; background: #fde8e8; padding: 2px 8px; border-radius: 10px; }
-    .historico-item .rdv-saldo-pos { font-weight: 800; color: #1a6b3a; font-size: 12px; background: #e8f8ee; padding: 2px 8px; border-radius: 10px; }
-    .btn-ver { background: #1a3a6b; color: white; border: none; border-radius: 4px; padding: 3px 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-ver:hover { background: #0a1f3d; }
-    .btn-del-item { background: #c0392b; color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-del-item:hover { background: #8b0000; }
-    .historico-vazio { text-align: center; color: #aaa; padding: 20px; font-size: 13px; }
-
-    /* ====== MODAL GENÉRICO ====== */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 10000; align-items: center; justify-content: center; }
-    .modal-overlay.show { display: flex; }
-    .modal-box { background: white; border-radius: 14px; padding: 28px 30px; max-width: 480px; width: 92%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
-    .modal-titulo { font-size: 16px; font-weight: 800; color: #0a1f3d; margin-bottom: 18px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
-    .modal-linha { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
-    .modal-linha .ml { color: #666; font-weight: 600; }
-    .modal-linha .mv { color: #222; font-weight: 700; text-align: right; max-width: 60%; }
-    .modal-linha .mv-verde { color: #1a6b3a; font-weight: 800; font-size: 15px; }
-    .modal-linha .mv-vermelho { color: #8b0000; font-weight: 800; font-size: 15px; }
-    .modal-fechar { position: absolute; top: 14px; right: 16px; background: #f0f0f0; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 16px; cursor: pointer; font-weight: bold; color: #555; }
-    .modal-fechar:hover { background: #e0e0e0; }
-
-    /* ====== MODAL CADASTRO FUNCIONÁRIO ====== */
-    .modal-box-cad {
-        background: white; border-radius: 14px; padding: 28px 30px;
-        max-width: 620px; width: 95%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        position: relative; max-height: 90vh; overflow-y: auto;
-    }
-    .cad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-    .cad-grid-full { grid-column: 1 / -1; }
-    .cad-label { font-size: 11px; font-weight: 700; color: #555; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
-    .cad-input {
-        width: 100%; border: 1.5px solid #dce1e7; border-radius: 7px;
-        padding: 9px 12px; font-size: 13px; outline: none; font-family: inherit;
-        transition: border-color 0.15s;
-    }
-    .cad-input:focus { border-color: #7c3aed; }
-    .cad-select { width: 100%; border: 1.5px solid #dce1e7; border-radius: 7px; padding: 9px 12px; font-size: 13px; outline: none; font-family: inherit; background: white; }
-    .cad-select:focus { border-color: #7c3aed; }
-    .cad-secao { font-size: 11px; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #ede9fe; }
-    .btn-salvar-cad { width: 100%; background: #7c3aed; color: white; border: none; border-radius: 8px; padding: 13px; font-weight: 800; font-size: 15px; cursor: pointer; margin-top: 16px; transition: background 0.15s; }
-    .btn-salvar-cad:hover { background: #6d28d9; }
-    .btn-salvar-cad:disabled { background: #aaa; cursor: not-allowed; }
-
-    /* ====== SEÇÃO FUNCIONÁRIOS ====== */
-    .funcs-area { margin: 0 30px 20px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid #7c3aed; }
-    .funcs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .funcs-lista { max-height: 220px; overflow-y: auto; }
-    .func-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 6px; margin-bottom: 4px; background: #f8f9fa; font-size: 12px; border-left: 3px solid #7c3aed; flex-wrap: wrap; }
-    .func-nome { font-weight: 700; color: #1a3a6b; flex: 1; min-width: 140px; }
-    .func-setor { color: #555; font-size: 11px; }
-    .func-badge { background: #ede9fe; color: #7c3aed; border-radius: 10px; padding: 2px 8px; font-size: 10px; font-weight: 700; }
-    .func-badge-op { background: #fce7f3; color: #9d174d; }
-    .btn-edit-func { background: #1a3a6b; color: white; border: none; border-radius: 4px; padding: 3px 9px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-    .btn-edit-func:hover { background: #0a1f3d; }
-    .btn-del-func { background: #c0392b; color: white; border: none; border-radius: 4px; padding: 3px 8px; font-size: 11px; font-weight: 700; cursor: pointer; }
-    .btn-del-func:hover { background: #8b0000; }
-    .funcs-busca { border: 1.5px solid #dce1e7; border-radius: 7px; padding: 8px 12px; font-size: 13px; outline: none; width: 220px; }
-    .funcs-busca:focus { border-color: #7c3aed; }
-
-    .toast { position: fixed; bottom: 30px; right: 30px; z-index: 9999; background: #1a3a6b; color: white; padding: 14px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; max-width: 320px; }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.sucesso { background: #1a6b3a; }
-    .toast.erro { background: #8b0000; }
-
-    #doc-container { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
-    .folha-a4 { width: 210mm; min-height: 297mm; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,0.15); box-sizing: border-box; }
-    .btn-imprimir { background: #8b0000; color: white; border: none; border-radius: 6px; padding: 12px 25px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
-
-    .rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
-    .rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
-    .rdv-table input, .rdv-table select { border: none; background: transparent; font-family: Arial, sans-serif; font-size: 9px; outline: none; width: 100%; padding: 0; }
-
-    .bg-amarelo { background-color: #FFFF99; }
-    .bg-azul-claro { background-color: #DDEEFF; }
-    .bg-azul-medio { background-color: #BDD7EE; }
-    .bg-cinza { background-color: #D9D9D9; }
-    .bg-laranja { background-color: #FCE4D6; }
-    .bg-verde { background-color: #E2EFDA; }
-    .bg-amarelo-escuro { background-color: #FFEB9C; }
-
-    .lbl { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
-    .td-categoria { font-weight: bold; font-size: 9px; text-align: center; background-color: #f9f9f9; width: 115px; vertical-align: middle; }
-    .td-valor-input { background-color: #DDEEFF; padding: 0; }
-    .td-valor-input input { text-align: right; padding: 2px 4px; height: 20px; background-color: #DDEEFF; }
-    .td-total-cat { background-color: #BDD7EE; font-weight: bold; text-align: right; font-size: 9px; width: 88px; white-space: nowrap; padding: 3px 6px; }
-    .td-soma-label { background-color: #1F4E79; color: white; font-weight: bold; font-size: 9px; text-align: left; padding: 4px 8px; }
-    .td-soma-valor { background-color: #1F4E79; color: white; font-weight: bold; font-size: 11px; text-align: right; padding: 4px 8px; }
-    .td-saldo-label { background-color: #FFFF99; font-weight: bold; font-size: 9px; }
-    .td-saldo-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; }
-    .td-saldo-desc { background-color: #FFFF99; font-weight: bold; font-size: 9px; text-align: center; }
-    .td-aviso { text-align: center; font-size: 8px; font-style: italic; padding: 4px; background-color: #f9f9f9; }
-    .td-banco-label { font-size: 8px; font-weight: bold; background-color: #f9f9f9; width: 60px; }
-    .td-banco-input { background-color: #FFFF99; }
-    .td-banco-input input { background-color: #FFFF99; font-size: 9px; }
-    .td-declaracao { text-align: center; font-weight: bold; font-size: 8px; background-color: #D9D9D9; padding: 5px; }
-    .td-adiant-label { background-color: #D9D9D9; font-weight: bold; font-size: 9px; padding: 5px 8px; }
-    .td-adiant-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; padding: 5px 8px; }
-
-    @media print {
-        body { background: white; padding: 0; margin: 0; }
-        .header-sistema, .cards, .search-area, .historico-area, .funcs-area, .btn-imprimir, .toast { display: none !important; }
-        #doc-container { display: flex !important; padding: 0; }
-        .folha-a4 { box-shadow: none; width: 100%; padding: 8mm 10mm; margin: 0; }
-        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    }
-</style>
-```
-
-</head>
-<body onload="init()">
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bucagrans — PCH Lebon Regis</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- HEADER -->
+<style>
+:root {
+  --azul:       #1B3A6B;
+  --azul-esc:   #0f2244;
+  --azul-med:   #2952a3;
+  --azul-clr:   #5b9cf6;
+  --sidebar-w:  220px;
+  --branco:     #ffffff;
+  --cinza-bg:   #f4f6fb;
+  --cinza-brd:  #dce2ef;
+  --cinza-txt:  #94a3b8;
+  --verde:      #16a34a;
+  --amarelo:    #d97706;
+  --vermelho:   #dc2626;
+  --radius:     10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito Sans', sans-serif; background: var(--cinza-bg); color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
 
-<div class="header-sistema">
-    <div>
-        <h1>BUCAGRANS</h1>
-        <p>PCH LEBON REGIS - CONTROLE DE RDV</p>
+/* ===== LAYOUT ===== */
+.app { display: flex; min-height: 100vh; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--azul);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 200;
+  box-shadow: 4px 0 20px rgba(15,34,68,.25);
+}
+.sidebar-logo {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.sidebar-logo .company {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -.2px;
+  line-height: 1.2;
+}
+.sidebar-logo .project {
+  font-size: 10px;
+  color: rgba(255,255,255,.5);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+.sidebar-logo .status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 10px;
+  color: rgba(255,255,255,.5);
+}
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #f59e0b; }
+.status-dot.online { background: #22c55e; }
+.status-dot.erro { background: #ef4444; }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+.status-dot:not(.online):not(.erro) { animation: blink 1.4s infinite; }
+
+.nav-section {
+  padding: 14px 0 6px;
+}
+.nav-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.3);
+  padding: 0 20px;
+  margin-bottom: 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.6);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all .18s;
+  user-select: none;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+.nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--azul-clr); }
+.nav-item .ico { font-size: 15px; width: 18px; text-align: center; }
+.nav-item .badge-nav {
+  margin-left: auto;
+  background: var(--azul-clr);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 1px 7px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  font-size: 10px;
+  color: rgba(255,255,255,.3);
+  text-align: center;
+}
+
+/* ===== MAIN ===== */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--cinza-brd);
+  padding: 0 28px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--azul);
+  letter-spacing: -.2px;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-date {
+  font-size: 12px;
+  color: var(--cinza-txt);
+  font-weight: 600;
+}
+
+.content { padding: 24px 28px; flex: 1; }
+
+/* ===== ABAS ===== */
+.aba { display: none; animation: fadeUp .25s ease; }
+.aba.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
+
+/* ===== CARDS RESUMO ===== */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.card-resumo {
+  background: #fff;
+  border: 1px solid var(--cinza-brd);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: 0 2px 10px rgba(27,58,107,.06);
+  position: relative;
+  overflow: hidden;
+}
+.card-resumo::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.card-resumo.azul::after { background: var(--azul); }
+.card-resumo.verde::after { background: var(--verde); }
+.card-resumo.amarelo::after { background: var(--amarelo); }
+.card-resumo.roxo::after { background: #7c3aed; }
+.card-resumo .c-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--cinza-txt); margin-bottom: 6px; }
+.card-resumo .c-val { font-family: 'Nunito', sans-serif; font-size: 26px; font-weight: 900; color: var(--azul); line-height: 1; }
+.card-resumo .c-sub { font-size: 11px; color: var(--cinza-txt); margin-top: 4px; font-weight: 600; }
+.card-resumo .btn-ajuste-card {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--cinza-bg); border: 1px solid var(--cinza-brd);
+  color: var(--cinza-txt); font-size: 9px; font-weight: 700;
+  padding: 3px 8px; border-radius: 4px; cursor: pointer;
+  text-transform: uppercase; letter-spacing: .5px;
+}
+.card-resumo .btn-ajuste-card:hover { background: var(--azul); color: #fff; border-color: var(--azul); }
+
+/* ===== PAINÉIS ===== */
+.painel {
+  background: #fff;
+  border: 1px solid var(--cinza-brd);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 10px rgba(27,58,107,.06);
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.painel-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--cinza-brd);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbfd;
+}
+.painel-titulo {
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--azul);
+}
+.painel-body { padding: 20px; }
+
+/* ===== FORMULÁRIOS ===== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid-full { grid-column: 1 / -1; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #475569; }
+.form-input, .form-select {
+  border: 1.5px solid var(--cinza-brd);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-size: 13px;
+  font-family: 'Nunito Sans', sans-serif;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--azul-med);
+  box-shadow: 0 0 0 3px rgba(41,82,163,.1);
+}
+.form-input:disabled { background: var(--cinza-bg); color: var(--cinza-txt); }
+
+/* ===== BOTÕES ===== */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 8px; border: none; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s; white-space: nowrap; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn-primary { background: var(--azul); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--azul-esc); }
+.btn-success { background: var(--verde); color: #fff; }
+.btn-success:hover:not(:disabled) { background: #15803d; }
+.btn-danger { background: var(--vermelho); color: #fff; }
+.btn-danger:hover:not(:disabled) { background: #b91c1c; }
+.btn-secondary { background: var(--cinza-bg); color: #475569; border: 1px solid var(--cinza-brd); }
+.btn-secondary:hover:not(:disabled) { background: #e2e8f0; }
+.btn-purple { background: #7c3aed; color: #fff; }
+.btn-purple:hover:not(:disabled) { background: #6d28d9; }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* ===== TABELAS ===== */
+.table-wrap { overflow-x: auto; }
+table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.tbl th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cinza-txt);
+  background: #f8fafd;
+  border-bottom: 1px solid var(--cinza-brd);
+}
+table.tbl td {
+  padding: 11px 14px;
+  color: #374151;
+  border-bottom: 1px solid #f1f5f9;
+}
+table.tbl tr:last-child td { border-bottom: none; }
+table.tbl tr:hover td { background: #f8fafd; }
+
+/* ===== BADGES ===== */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.badge-ok { background: #dcfce7; color: #16a34a; }
+.badge-pend { background: #fef9c3; color: #a16207; }
+.badge-rev { background: #fee2e2; color: #dc2626; }
+.badge-adm { background: #ede9fe; color: #7c3aed; }
+.badge-op { background: #fce7f3; color: #9d174d; }
+.badge-demissao { background: #fff3cd; color: #856404; }
+.badge-rescisao { background: #fee2e2; color: #dc2626; }
+
+/* ===== VAZIO ===== */
+.vazio { text-align: center; color: var(--cinza-txt); padding: 30px 20px; font-size: 13px; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--azul); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  transform: translateY(20px); opacity: 0;
+  transition: all .25s ease;
+  max-width: 340px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.sucesso { background: #16a34a; }
+.toast.erro { background: #dc2626; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,34,68,.45);
+  z-index: 10000; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 14px;
+  padding: 28px 30px; max-width: 520px; width: 94%;
+  box-shadow: 0 24px 60px rgba(0,0,0,.2);
+  position: relative; max-height: 90vh; overflow-y: auto;
+}
+.modal-titulo {
+  font-family: 'Nunito', sans-serif;
+  font-size: 16px; font-weight: 900; color: var(--azul);
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--cinza-brd);
+}
+.modal-fechar {
+  position: absolute; top: 14px; right: 16px;
+  background: var(--cinza-bg); border: none; border-radius: 50%;
+  width: 28px; height: 28px; font-size: 15px;
+  cursor: pointer; color: #64748b; font-weight: 700;
+}
+.modal-fechar:hover { background: #e2e8f0; }
+.modal-linha { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.modal-linha:last-child { border-bottom: none; }
+.ml { color: #64748b; font-weight: 600; }
+.mv { color: #1e293b; font-weight: 700; text-align: right; max-width: 60%; }
+.mv-verde { color: var(--verde); font-weight: 800; font-size: 15px; }
+.mv-verm { color: var(--vermelho); font-weight: 800; font-size: 15px; }
+
+/* ===== SEÇÃO FORMULÁRIO ===== */
+.secao-form {
+  font-size: 10px; font-weight: 800; color: var(--azul-med);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin: 20px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #ede9fe;
+}
+
+/* ===== LISTA FUNCIONÁRIOS ===== */
+.func-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-radius: 8px;
+  margin-bottom: 4px; background: var(--cinza-bg);
+  font-size: 12px; border-left: 3px solid var(--azul);
+  flex-wrap: wrap;
+}
+.func-nome { font-weight: 700; color: var(--azul); flex: 1; min-width: 140px; }
+.func-setor { color: #64748b; font-size: 11px; }
+
+/* ===== PASSAGENS FORM ===== */
+.passagem-row {
+  background: var(--cinza-bg);
+  border: 1px solid var(--cinza-brd);
+  border-radius: 8px; padding: 12px; margin-bottom: 8px;
+}
+
+/* ===== BADGE REGRA ESPECIAL ===== */
+.badge-regra-info {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px; font-weight: 700;
+  margin-bottom: 14px;
+}
+
+/* ===== IMPRESSÃO ===== */
+@page { size: A4; margin: 0; }
+@media print {
+  .sidebar, .topbar, .content > .aba:not(.printing), .toast { display: none !important; }
+  .main { margin-left: 0 !important; }
+  #print-area { display: block !important; }
+  .folha-a4 { box-shadow: none !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+#print-area { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
+.folha-a4 { width: 210mm; min-height: 297mm; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+.rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
+.rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
+.rdv-table input, .rdv-table select { border: none; background: transparent; font-family: Arial, sans-serif; font-size: 9px; outline: none; width: 100%; padding: 0; }
+.bg-amarelo { background-color: #FFFF99; }
+.bg-cinza { background-color: #D9D9D9; }
+.lbl-rdv { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
+.td-categoria { font-weight: bold; font-size: 9px; text-align: center; background-color: #f9f9f9; width: 115px; vertical-align: middle; }
+.td-valor-input { background-color: #DDEEFF; padding: 0; }
+.td-valor-input input { text-align: right; padding: 2px 4px; height: 20px; background-color: #DDEEFF; }
+.td-total-cat { background-color: #BDD7EE; font-weight: bold; text-align: right; font-size: 9px; width: 88px; white-space: nowrap; padding: 3px 6px; }
+.td-soma-label { background-color: #1F4E79; color: white; font-weight: bold; font-size: 9px; text-align: left; padding: 4px 8px; }
+.td-soma-valor { background-color: #1F4E79; color: white; font-weight: bold; font-size: 11px; text-align: right; padding: 4px 8px; }
+.td-saldo-label { background-color: #FFFF99; font-weight: bold; font-size: 9px; }
+.td-saldo-valor { background-color: #FFFF99; font-weight: bold; font-size: 11px; text-align: center; }
+.td-saldo-desc { background-color: #FFFF99; font-weight: bold; font-size: 9px; text-align: center; }
+.td-banco-label { font-size: 8px; font-weight: bold; background-color: #f9f9f9; width: 60px; }
+.td-banco-input { background-color: #FFFF99; }
+.td-banco-input input { background-color: #FFFF99; font-size: 9px; }
+.btn-imprimir { background: #1B3A6B; color: white; border: none; border-radius: 6px; padding: 12px 25px; font-weight: bold; cursor: pointer; margin-bottom: 15px; font-family: 'Nunito', sans-serif; font-size: 14px; }
+
+/* ===== RELATÓRIO BAIXADAS IMPRESSÃO ===== */
+#rel-baixadas { display: none; background: white; padding: 30px; color: black; border: 1px solid #ddd; margin: 12px; border-radius: 8px; }
+.assinatura-area { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
+.linha-ass { border-top: 1px solid black; width: 220px; padding-top: 5px; font-size: 11px; }
+
+/* ===== SPINNER ===== */
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+
+</head>
+<body>
+<div class="app">
+
+<!-- ===== SIDEBAR ===== -->
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="company">Bucagrans</div>
+    <div class="project">PCH · Lebon Regis</div>
+    <div class="status-bar">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-txt">Conectando...</span>
     </div>
-    <div style="display:flex; align-items:center; gap:20px;">
-        <div class="firebase-status">
-            <div class="status-dot" id="status-dot"></div>
-            <span id="status-txt">Conectando...</span>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Módulos</div>
+    <div class="nav-item active" onclick="irPara('aba-rdv', this)">
+      <span class="ico">📋</span> RDV
+      <span class="badge-nav" id="nav-badge-rdv">—</span>
+    </div>
+    <div class="nav-item" onclick="irPara('aba-baixadas', this)">
+      <span class="ico">🏖️</span> Compra de Folgas
+      <span class="badge-nav" id="nav-badge-baixadas">—</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Cadastros</div>
+    <div class="nav-item" onclick="irPara('aba-funcionarios', this)">
+      <span class="ico">👥</span> Funcionários
+      <span class="badge-nav" id="nav-badge-funcs">—</span>
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Dados</div>
+    <div class="nav-item" onclick="irPara('aba-historico', this)">
+      <span class="ico">📊</span> Histórico Geral
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    v2.0 · 2026
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">RDV — Relatório de Despesas</div>
+    <div class="topbar-right">
+      <span class="topbar-date" id="data-topo">--/--/----</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+```
+<!-- ==================== ABA RDV ==================== -->
+<div class="aba active" id="aba-rdv">
+  <div class="cards-grid">
+    <div class="card-resumo azul">
+      <button class="btn-ajuste-card" onclick="ajustarNumeroManual()">AJUSTAR</button>
+      <div class="c-label">Nº RDV Atual</div>
+      <div class="c-val" id="card-rdv">---</div>
+      <div class="c-sub">Próximo a ser gerado</div>
+    </div>
+    <div class="card-resumo verde">
+      <div class="c-label">RDVs Gerados</div>
+      <div class="c-val" id="card-count">0</div>
+      <div class="c-sub">Total no Firebase</div>
+    </div>
+    <div class="card-resumo amarelo">
+      <div class="c-label">Sincronizado</div>
+      <div class="c-val" id="card-sync">☁</div>
+      <div class="c-sub">Status nuvem</div>
+    </div>
+    <div class="card-resumo roxo">
+      <div class="c-label">Funcionários</div>
+      <div class="c-val" id="card-funcs">0</div>
+      <div class="c-sub">Cadastrados</div>
+    </div>
+  </div>
+
+  <!-- Buscar e gerar -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Localizar Funcionário e Gerar RDV</div>
+      <button class="btn btn-purple btn-sm" onclick="abrirCadastro(null)">➕ Novo Funcionário</button>
+    </div>
+    <div class="painel-body">
+      <div class="form-grid">
+        <div class="form-group form-grid-full">
+          <label class="form-label">Nome do Colaborador</label>
+          <input type="text" id="input-busca" class="form-input" list="lista-func" placeholder="Digite para buscar...">
+          <datalist id="lista-func"></datalist>
         </div>
-        <div id="data-topo" style="font-weight: bold;">--/--/----</div>
+      </div>
+      <div style="margin-top:14px;">
+        <button class="btn btn-success" onclick="prepararDoc()">📄 GERAR RDV</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Histórico RDV -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Histórico de RDVs</div>
+      <button class="btn btn-danger btn-sm" onclick="apagarHistorico()">🗑️ Apagar Tudo</button>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Nº RDV</th>
+            <th>Colaborador</th>
+            <th>Destino</th>
+            <th>Total Despesas</th>
+            <th>Saldo</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="historico-lista">
+          <tr><td colspan="7" class="vazio">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- CARDS -->
+<!-- ==================== ABA BAIXADAS ==================== -->
+<div class="aba" id="aba-baixadas">
+  <div class="cards-grid">
+    <div class="card-resumo verde">
+      <div class="c-label">Gasto Total Acumulado</div>
+      <div class="c-val" id="gasto-total-card" style="font-size:18px;">R$ 0,00</div>
+      <div class="c-sub">Registros no Firebase</div>
+    </div>
+    <div class="card-resumo azul">
+      <div class="c-label">Registros</div>
+      <div class="c-val" id="card-baixadas-count">0</div>
+      <div class="c-sub">Total de cálculos</div>
+    </div>
+  </div>
 
-<div class="cards">
-    <div class="card c-azul">
-        <button class="btn-ajuste" onclick="ajustarNumeroManual()">AJUSTAR</button>
-        <span class="num" id="card-rdv">---</span>
-        <span class="lbl">Nº RDV Atual</span>
+  <!-- Formulário -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Novo Cálculo de Indenização / Folgas</div>
     </div>
-    <div class="card c-vermelho">
-        <span class="num" id="card-count">0</span>
-        <span class="lbl">RDVs Gerados</span>
+    <div class="painel-body">
+      <div class="form-grid">
+        <div class="form-group form-grid-full">
+          <label class="form-label">Nome do Colaborador</label>
+          <input type="text" id="b-nome" class="form-input" list="lista-func-baixadas" placeholder="Digite para buscar...">
+          <datalist id="lista-func-baixadas"></datalist>
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">Regra de Distância / Tipo</label>
+          <select id="b-periodo" class="form-select" onchange="onRegraChange()">
+            <option value="0">Selecione a regra...</option>
+            <option value="2">Até 500 km (60 dias — 2 dias de folga)</option>
+            <option value="5">501 km a 1.000 km (75 dias — 5 dias de folga)</option>
+            <option value="7">Acima de 1.000 km (90 dias — 7 dias de folga)</option>
+            <option value="demissao">Pedido de Demissão</option>
+            <option value="rescisao">Rescisão de Contrato</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="badge-regra-info" class="badge-regra-info"></div>
+
+      <div id="campo-salario-wrap">
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="form-group">
+            <label class="form-label">Salário Base (R$)</label>
+            <input type="number" id="b-salario" class="form-input" placeholder="Ex: 3500">
+          </div>
+        </div>
+      </div>
+
+      <!-- Passagens -->
+      <div style="margin-top:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span class="form-label">Passagens / Trechos</span>
+          <button class="btn btn-secondary btn-sm" onclick="adicionarPassagem()">+ Adicionar Trecho</button>
+        </div>
+        <div id="lista-passagens"></div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <button class="btn btn-success btn-full" id="btn-gerar-baixada" onclick="gerarBaixada()">
+          📄 GERAR RELATÓRIO E SALVAR
+        </button>
+      </div>
     </div>
-    <div class="card c-verde">
-        <span class="num" id="card-sync">☁</span>
-        <span class="lbl">Sincronizado na Nuvem</span>
+  </div>
+
+  <!-- Histórico Baixadas -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Histórico de Folgas / Baixadas</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="busca-baixadas" class="form-input" style="width:200px;padding:6px 12px;font-size:12px;" placeholder="🔍 Buscar nome..." oninput="filtrarBaixadas()">
+        <button class="btn btn-danger btn-sm" onclick="limparBaixadas()">🗑️ Limpar Tudo</button>
+      </div>
     </div>
-    <div class="card c-roxo">
-        <span class="num" id="card-funcs">0</span>
-        <span class="lbl">Funcionários Cadastrados</span>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>Data</th><th>Colaborador</th><th>Regra</th><th>Total</th><th>Ação</th></tr>
+        </thead>
+        <tbody id="hist-baixadas">
+          <tr><td colspan="5" class="vazio">Carregando...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
-<!-- BUSCAR / GERAR RDV -->
-
-<div class="search-area">
-    <p style="font-weight:700; color:#0a1f3d;">1. Localizar Funcionário</p>
-    <div class="search-row">
-        <input type="text" id="input-busca" class="input-busca" list="lista-func" placeholder="Digite o nome para buscar...">
-        <datalist id="lista-func"></datalist>
-        <button class="btn-novo-func" onclick="abrirCadastro(null)">➕ Novo Funcionário</button>
-        <button class="btn-gerar" onclick="prepararDoc()">GERAR RDV</button>
+<!-- ==================== ABA FUNCIONÁRIOS ==================== -->
+<div class="aba" id="aba-funcionarios">
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Funcionários Cadastrados</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" class="form-input" id="busca-func" style="width:200px;padding:6px 12px;font-size:12px;" placeholder="🔍 Filtrar..." oninput="filtrarFuncs()">
+        <button class="btn btn-purple btn-sm" onclick="abrirCadastro(null)">➕ Novo</button>
+      </div>
     </div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>Nome</th><th>Setor / Função</th><th>Centro de Custo</th><th>Banco</th><th>PIX</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="funcs-lista">
+          <tr><td colspan="6" class="vazio">Carregando funcionários...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
-<!-- LISTA DE FUNCIONÁRIOS -->
+<!-- ==================== ABA HISTÓRICO GERAL ==================== -->
+<div class="aba" id="aba-historico">
+  <div class="cards-grid">
+    <div class="card-resumo azul">
+      <div class="c-label">Total RDVs</div>
+      <div class="c-val" id="hg-rdvs">—</div>
+    </div>
+    <div class="card-resumo verde">
+      <div class="c-label">Total Folgas/Baixadas</div>
+      <div class="c-val" id="hg-baixadas">—</div>
+    </div>
+    <div class="card-resumo amarelo">
+      <div class="c-label">Despesas RDV (total)</div>
+      <div class="c-val" id="hg-desp" style="font-size:16px;">—</div>
+    </div>
+    <div class="card-resumo roxo">
+      <div class="c-label">Gasto Folgas (total)</div>
+      <div class="c-val" id="hg-folg" style="font-size:16px;">—</div>
+    </div>
+  </div>
+  <div class="painel">
+    <div class="painel-header"><div class="painel-titulo">Todos os Registros</div></div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>Tipo</th><th>Data</th><th>Colaborador</th><th>Descrição</th><th>Valor</th></tr></thead>
+        <tbody id="hist-geral"><tr><td colspan="5" class="vazio">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+```
 
-<div class="funcs-area">
-    <div class="funcs-header">
-        <p style="font-weight:700; color:#4a1a6b;">👥 Funcionários Cadastrados</p>
-        <input type="text" class="funcs-busca" id="busca-func" placeholder="🔍 Filtrar..." oninput="filtrarFuncs()">
-    </div>
-    <div class="funcs-lista" id="funcs-lista">
-        <div class="historico-vazio">Carregando funcionários...</div>
-    </div>
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===== MODAL DETALHES RDV ===== -->
+
+<div class="modal-overlay" id="modal-rdv" onclick="fecharModalClick(event,'modal-rdv')">
+  <div class="modal-box">
+    <button class="modal-fechar" onclick="fecharModal('modal-rdv')">✕</button>
+    <div class="modal-titulo" id="modal-rdv-titulo">Detalhes do RDV</div>
+    <div id="modal-rdv-corpo"></div>
+  </div>
 </div>
 
-<!-- HISTÓRICO -->
+<!-- ===== MODAL CADASTRO FUNCIONÁRIO ===== -->
 
-<div class="historico-area">
-    <div class="historico-header">
-        <p class="historico-titulo">📋 Histórico de RDVs (Firebase)</p>
-        <button class="btn-apagar-hist" onclick="apagarHistorico()">🗑️ APAGAR HISTÓRICO</button>
+<div class="modal-overlay" id="modal-cad" onclick="fecharModalClick(event,'modal-cad')">
+  <div class="modal-box">
+    <button class="modal-fechar" onclick="fecharModal('modal-cad')">✕</button>
+    <div class="modal-titulo" id="cad-titulo">Cadastrar Funcionário</div>
+    <div class="form-grid">
+      <div class="form-group form-grid-full">
+        <label class="form-label">Nome Completo *</label>
+        <input type="text" class="form-input" id="cad-nome" placeholder="Nome em maiúsculas">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Função / Setor *</label>
+        <input type="text" class="form-input" id="cad-setor" placeholder="Ex: MOTORISTA">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Centro de Custo *</label>
+        <select class="form-select" id="cad-cc">
+          <option value="OPERACIONAL">OPERACIONAL</option>
+          <option value="ADMINISTRAÇÃO">ADMINISTRAÇÃO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">CPF</label>
+        <input type="text" class="form-input" id="cad-cpf" placeholder="000.000.000-00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">PIX</label>
+        <input type="text" class="form-input" id="cad-pix" placeholder="Chave PIX">
+      </div>
     </div>
-    <div class="historico-lista" id="historico-lista">
-        <div class="historico-vazio">Carregando histórico...</div>
+    <div class="secao-form">Dados Bancários</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Banco</label>
+        <input type="text" class="form-input" id="cad-banco" placeholder="Ex: NUBANK">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="cad-tipo">
+          <option value="cc">CORRENTE</option>
+          <option value="cp">POUPANÇA</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Agência</label>
+        <input type="text" class="form-input" id="cad-ag" placeholder="0000-0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Conta</label>
+        <input type="text" class="form-input" id="cad-conta" placeholder="00000-0">
+      </div>
     </div>
+    <input type="hidden" id="cad-doc-id">
+    <button class="btn btn-purple btn-full" id="btn-salvar-cad" onclick="salvarFuncionario()" style="margin-top:20px;">
+      💾 SALVAR FUNCIONÁRIO
+    </button>
+  </div>
+</div>
+
+<!-- ===== ÁREA DE IMPRESSÃO RDV ===== -->
+
+<div id="print-area">
+  <button class="btn-imprimir" onclick="finalizarRDV()">🖨️ CONFIRMAR E IMPRIMIR</button>
+  <div class="folha-a4">
+    <table class="rdv-table">
+      <tr>
+        <td rowspan="2" style="width:95px;text-align:center;vertical-align:middle;padding:5px;">
+          <img src="logo-pch.png" style="max-width:82px;max-height:58px;">
+        </td>
+        <td colspan="6" style="text-align:center;font-size:14px;font-weight:bold;padding:8px 6px;">
+          BUCAGRANS CONSTRUTORA DE OBRAS S.A
+        </td>
+        <td style="vertical-align:top;padding:3px 6px;background:#FFFF99;width:75px;">
+          <div style="font-size:7.5px;font-weight:bold;">DATA:</div>
+          <input type="text" id="data-doc" style="background:#FFFF99;font-weight:bold;font-size:10px;border:none;outline:none;width:100%;margin-top:1px;">
+        </td>
+        <td rowspan="2" style="width:105px;vertical-align:middle;text-align:center;padding:5px;background:#FFFF99;">
+          <div style="font-size:7px;font-weight:bold;color:#333;line-height:1.4;margin-bottom:3px;">Nº RDV E<br>Nº DA OBRA</div>
+          <div style="font-size:19px;font-weight:bold;line-height:1.15;">
+            <span id="txt-num-rdv">---</span>/26-63
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6" style="padding:4px 6px;vertical-align:middle;">
+          <div style="font-size:11px;font-weight:bold;">RDV - RELATÓRIO DE DESPESAS DE VIAGEM</div>
+          <div style="font-size:7px;color:#555;margin-top:2px;">PREENCHER TODOS OS CAMPOS EM AMARELO E LANÇAR OS VALORES NO CAMPO AZUL</div>
+        </td>
+        <td style="background:#FFFF99;"></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="bg-amarelo"><span class="lbl-rdv">COLABORADOR:</span><input type="text" id="f-nome" readonly></td>
+        <td colspan="3" class="bg-amarelo"><span class="lbl-rdv">DESTINO:</span><input type="text" id="f-destino"></td>
+        <td colspan="2" style="background:white;border-left:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="bg-amarelo"><span class="lbl-rdv">SETOR/FUNÇÃO:</span><input type="text" id="f-setor" readonly></td>
+        <td colspan="3" class="bg-amarelo"><span class="lbl-rdv">CENTRO DE CUSTO:</span><input type="text" id="f-ccusto" readonly></td>
+        <td colspan="2" style="background:white;border-left:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="bg-amarelo"><span class="lbl-rdv">DATA VIAGEM:</span><input type="text" id="f-saida"></td>
+        <td colspan="3" class="bg-amarelo"><span class="lbl-rdv">DATA DO RETORNO:</span><input type="text" id="f-retorno"></td>
+        <td colspan="2" style="background:white;border-left:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="7" class="bg-amarelo"><span class="lbl-rdv">MOTIVO DA VIAGEM ou RDV:</span><input type="text" id="f-motivo"></td>
+        <td colspan="2" style="background:white;border-left:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="3" style="background:#D9D9D9;font-weight:bold;font-size:9px;padding:5px 8px;">VALOR DO ADIANTAMENTO RECEBIDO:</td>
+        <td colspan="4" style="background:#FFFF99;font-weight:bold;font-size:11px;text-align:center;padding:5px 8px;">
+          <input type="text" id="f-adiantamento" value="R$ 0,00" style="background:#FFFF99;font-weight:bold;font-size:11px;text-align:center;" oninput="calcularSaldo()">
+        </td>
+        <td colspan="2" style="background:white;border-left:none;"></td>
+      </tr>
+      <tr>
+        <td colspan="7" style="text-align:center;font-weight:bold;font-size:9px;background:#D9D9D9;padding:4px;">DISCRIMINAÇÃO DAS DESPESAS POR GRUPO:</td>
+        <td colspan="2" style="text-align:center;font-weight:bold;font-size:9px;background:#D9D9D9;">TOTAL</td>
+      </tr>
+    </table>
+    <table class="rdv-table" id="tabela-despesas" style="border-top:none;margin-top:-1px;">
+      <colgroup><col style="width:110px"><col><col><col><col><col><col><col style="width:85px"></colgroup>
+    </table>
+    <table class="rdv-table" style="border-top:none;margin-top:-1px;">
+      <tr>
+        <td colspan="7" class="td-soma-label">SOMA TOTAL DE DESPESAS:</td>
+        <td id="val-geral" class="td-soma-valor" style="width:88px;">R$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-</td>
+      </tr>
+      <tr>
+        <td colspan="2" class="td-saldo-label" style="padding:4px 8px;">SALDO:</td>
+        <td colspan="2" class="td-saldo-valor"><input type="text" id="val-saldo" readonly style="background:#FFFF99;font-weight:bold;font-size:11px;text-align:center;"></td>
+        <td colspan="4" class="td-saldo-desc">Saldo A PAGAR para o COLABORADOR</td>
+      </tr>
+      <tr><td colspan="8" style="text-align:center;font-size:8px;font-style:italic;padding:4px;background:#f9f9f9;">Junto com essa RDV, deverá anexar todas as notas e recibos comprobatórios.</td></tr>
+    </table>
+    <table class="rdv-table" style="border-top:none;margin-top:-1px;">
+      <tr>
+        <td rowspan="5" style="width:28%;text-align:center;font-weight:bold;font-size:8.5px;vertical-align:middle;background:#f0f0f0;">INFORMAR OS DADOS BANCÁRIOS E<br>PREFERNCIALMENTE A CHAVE PIX</td>
+        <td style="font-size:8px;font-weight:bold;background:#f9f9f9;width:60px;">Banco</td>
+        <td style="background:#FFFF99;"><input type="text" id="f-banco"></td>
+        <td rowspan="2" style="width:28%;text-align:center;font-size:8px;font-weight:bold;background:#f0f0f0;vertical-align:middle;">INFORME ABAIXO SE É CONTA<br>CORRENTE OU POUPANÇA</td>
+      </tr>
+      <tr>
+        <td style="font-size:8px;font-weight:bold;background:#f9f9f9;">Agência</td>
+        <td style="background:#FFFF99;"><input type="text" id="f-ag"></td>
+      </tr>
+      <tr>
+        <td style="font-size:8px;font-weight:bold;background:#f9f9f9;">Conta</td>
+        <td style="background:#FFFF99;"><input type="text" id="f-conta"></td>
+        <td rowspan="3" style="text-align:center;vertical-align:middle;font-size:8px;background:#FFFF99;font-weight:bold;padding:6px;">
+          <select id="f-tipo" style="background:#FFFF99;font-weight:bold;font-size:9px;text-align:center;border:none;outline:none;width:100%;">
+            <option value="cc">CORRENTE</option><option value="cp">POUPANÇA</option>
+          </select>
+        </td>
+      </tr>
+      <tr><td style="font-size:8px;font-weight:bold;background:#f9f9f9;">CPF</td><td style="background:#FFFF99;"><input type="text" id="f-cpf"></td></tr>
+      <tr><td style="font-size:8px;font-weight:bold;background:#f9f9f9;">PIX</td><td style="background:#FFFF99;"><input type="text" id="f-pix"></td></tr>
+    </table>
+    <table class="rdv-table" style="border-top:none;margin-top:-1px;">
+      <tr><td style="text-align:center;font-weight:bold;font-size:8.5px;background:#D9D9D9;padding:5px;">DECLARO HAVER RECEBIDO NESTA DATA AS DESPESAS DE VIAGEM ACIMA ESPECIFICADAS</td></tr>
+    </table>
+    <div style="margin-top:22px;font-family:Arial,sans-serif;">
+      <div style="display:flex;gap:50px;padding:0 20px;margin-bottom:32px;">
+        <div style="flex:0 0 36%;text-align:center;">
+          <div style="border-bottom:1px solid #000;min-height:28px;font-size:10px;font-weight:bold;color:#c00;text-align:center;padding-bottom:3px;">
+            <input type="text" id="f-data-ass" style="color:#c00;font-weight:bold;font-size:10px;width:100%;border:none;outline:none;background:transparent;font-family:Arial;text-align:center;">
+          </div>
+          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">DATA</div>
+        </div>
+        <div style="flex:0 0 52%;text-align:center;">
+          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
+          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:50px;padding:0 20px;">
+        <div style="flex:0 0 36%;text-align:center;">
+          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
+          <div style="font-size:9px;font-weight:bold;color:#000;text-align:center;margin-top:3px;"><span id="ass-nome"></span></div>
+          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:1px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
+        </div>
+        <div style="flex:0 0 52%;text-align:center;">
+          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
+          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">GESTOR ADM / FINANCEIRO</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RELATÓRIO BAIXADAS IMPRESSÃO ===== -->
+
+<div id="rel-baixadas">
+  <div style="text-align:center;margin-bottom:10px"><img src="logo-pch.png" style="width:120px;" onerror="this.style.display='none'"></div>
+  <h2 id="rel-titulo" style="text-align:center;border-bottom:2px solid #1B3A6B;padding-bottom:10px;font-size:18px;">DEMONSTRATIVO DE COMPRA DE FOLGAS</h2>
+  <br>
+  <p><strong>UNIDADE:</strong> PCH LEBON REGIS</p>
+  <p><strong>DATA:</strong> <span id="rel-data"></span></p>
+  <hr style="margin:15px 0">
+  <p><strong>COLABORADOR:</strong> <span id="rel-nome"></span></p>
+  <br>
+  <div id="rel-bloco-politica" style="background:#f9f9f9;padding:12px;border-radius:8px;border:1px solid #ddd;margin-bottom:15px">
+    <p style="font-size:11px;font-weight:bold;color:#1B3A6B;margin-bottom:5px">POLÍTICA DE DESLOCAMENTO E FOLGAS:</p>
+    <ul style="font-size:10px;list-style:none;line-height:1.8;color:#444">
+      <li><strong>1. Até 500 km:</strong> A cada 60 dias — 2 dias de folga.</li>
+      <li><strong>2. De 501 km a 1.000 km:</strong> A cada 75 dias — 5 dias de folga.</li>
+      <li><strong>3. Acima de 1.000 km:</strong> A cada 90 dias — 7 dias de folga.</li>
+    </ul>
+    <p style="font-size:10px;margin-top:8px;border-top:1px dashed #ccc;padding-top:8px">
+      <strong>Regra Aplicada:</strong> <span id="rel-regra-txt" style="font-weight:bold;color:#dc2626"></span><br>
+      <strong>Cálculo:</strong> (Salário Base / 220h) × 8h × Dias de direito.
+    </p>
+  </div>
+  <div id="rel-bloco-especial" style="display:none;background:#fdf2f2;padding:12px;border-radius:8px;border:2px solid #dc2626;margin-bottom:15px">
+    <p id="rel-especial-titulo" style="font-size:12px;font-weight:bold;color:#dc2626;margin-bottom:6px"></p>
+    <p id="rel-especial-desc" style="font-size:10px;color:#444;line-height:1.6"></p>
+  </div>
+  <table style="width:100%;border-collapse:collapse;border:1px solid #ddd">
+    <tr style="background:#f4f4f4">
+      <th style="padding:10px;border:1px solid #ddd;text-align:left">Descrição</th>
+      <th style="padding:10px;border:1px solid #ddd;text-align:right">Valor</th>
+    </tr>
+    <tbody id="rel-itens"></tbody>
+    <tr style="font-weight:bold;background:#eee;font-size:14px">
+      <td style="padding:10px;border:1px solid #ddd">VALOR LÍQUIDO A RECEBER</td>
+      <td style="padding:10px;border:1px solid #ddd;text-align:right;color:#16a34a">R$ <span id="rel-total"></span></td>
+    </tr>
+  </table>
+  <div style="margin-top:20px"><p><strong>Comprovantes Anexados:</strong></p><div id="rel-prints" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px"></div></div>
+  <div class="assinatura-area">
+    <div class="linha-ass">Responsável PCH Lebon Regis</div>
+    <div class="linha-ass">Assinatura do Colaborador</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- ====== MODAL DETALHES RDV ====== -->
-
-<div class="modal-overlay" id="modal-overlay" onclick="fecharModal(event)">
-    <div class="modal-box">
-        <button class="modal-fechar" onclick="document.getElementById('modal-overlay').classList.remove('show')">✕</button>
-        <div class="modal-titulo" id="modal-titulo">Detalhes do RDV</div>
-        <div id="modal-conteudo"></div>
-    </div>
-</div>
-
-<!-- ====== MODAL CADASTRO FUNCIONÁRIO ====== -->
-
-<div class="modal-overlay" id="modal-cad" onclick="fecharModalCad(event)">
-    <div class="modal-box-cad">
-        <button class="modal-fechar" onclick="document.getElementById('modal-cad').classList.remove('show')">✕</button>
-        <div class="modal-titulo" id="cad-titulo">➕ Cadastrar Funcionário</div>
-
-```
-    <div class="cad-secao">📋 Dados Pessoais / Profissionais</div>
-    <div class="cad-grid">
-        <div class="cad-grid-full">
-            <label class="cad-label">Nome Completo *</label>
-            <input type="text" class="cad-input" id="cad-nome" placeholder="Nome em maiúsculas">
-        </div>
-        <div>
-            <label class="cad-label">Função / Setor *</label>
-            <input type="text" class="cad-input" id="cad-setor" placeholder="Ex: MOTORISTA BASCULANTE">
-        </div>
-        <div>
-            <label class="cad-label">Centro de Custo *</label>
-            <select class="cad-select" id="cad-cc">
-                <option value="OPERACIONAL">OPERACIONAL</option>
-                <option value="ADMINISTRAÇÃO">ADMINISTRAÇÃO</option>
-            </select>
-        </div>
-        <div>
-            <label class="cad-label">CPF</label>
-            <input type="text" class="cad-input" id="cad-cpf" placeholder="000.000.000-00">
-        </div>
-        <div>
-            <label class="cad-label">PIX</label>
-            <input type="text" class="cad-input" id="cad-pix" placeholder="Chave PIX">
-        </div>
-    </div>
-
-    <div class="cad-secao">🏦 Dados Bancários</div>
-    <div class="cad-grid">
-        <div>
-            <label class="cad-label">Banco</label>
-            <input type="text" class="cad-input" id="cad-banco" placeholder="Ex: NUBANK, ITAU, CAIXA">
-        </div>
-        <div>
-            <label class="cad-label">Tipo de Conta</label>
-            <select class="cad-select" id="cad-tipo">
-                <option value="cc">CORRENTE</option>
-                <option value="cp">POUPANÇA</option>
-            </select>
-        </div>
-        <div>
-            <label class="cad-label">Agência</label>
-            <input type="text" class="cad-input" id="cad-ag" placeholder="0000-0">
-        </div>
-        <div>
-            <label class="cad-label">Conta</label>
-            <input type="text" class="cad-input" id="cad-conta" placeholder="00000-0">
-        </div>
-    </div>
-
-    <input type="hidden" id="cad-doc-id">
-    <button class="btn-salvar-cad" id="btn-salvar-cad" onclick="salvarFuncionario()">💾 SALVAR FUNCIONÁRIO</button>
-</div>
-```
-
-</div>
-
-<!-- ====== DOCUMENTO RDV ====== -->
-
-<div id="doc-container">
-    <button class="btn-imprimir" onclick="finalizar()">🖨️ CONFIRMAR E IMPRIMIR</button>
-
-```
-<div class="folha-a4">
-    <table class="rdv-table">
-        <tr>
-            <td rowspan="2" style="width:95px; text-align:center; vertical-align:middle; padding:5px;">
-                <img src="logo-pch.png" style="max-width:82px; max-height:58px;">
-            </td>
-            <td colspan="6" style="text-align:center; font-size:14px; font-weight:bold; padding:8px 6px;">
-                BUCAGRANS CONSTRUTORA DE OBRAS S.A
-            </td>
-            <td style="vertical-align:top; padding:3px 6px; background:#FFFF99; width:75px;">
-                <div style="font-size:7.5px; font-weight:bold;">DATA:</div>
-                <input type="text" id="data-doc" style="background:#FFFF99; font-weight:bold; font-size:10px; border:none; outline:none; width:100%; margin-top:1px;">
-            </td>
-            <td rowspan="2" style="width:105px; vertical-align:middle; text-align:center; padding:5px; background:#FFFF99;">
-                <div style="font-size:7px; font-weight:bold; color:#333; line-height:1.4; margin-bottom:3px;">Nº RDV E<br>Nº DA OBRA</div>
-                <div style="font-size:19px; font-weight:bold; line-height:1.15;">
-                    <span id="txt-num-rdv">---</span>/26-63
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="6" style="padding:4px 6px; vertical-align:middle;">
-                <div style="font-size:11px; font-weight:bold;">RDV - RELATÓRIO DE DESPESAS DE VIAGEM</div>
-                <div style="font-size:7px; color:#555; margin-top:2px;">PREENCHER TODOS OS CAMPOS EM AMARELO E LANÇAR OS VALORES NO CAMPO AZUL</div>
-            </td>
-            <td style="background:#FFFF99;"></td>
-        </tr>
-        <tr>
-            <td colspan="4" class="bg-amarelo"><span class="lbl">COLABORADOR:</span><input type="text" id="f-nome" readonly></td>
-            <td colspan="3" class="bg-amarelo"><span class="lbl">DESTINO:</span><input type="text" id="f-destino"></td>
-            <td colspan="2" style="background:white; border-left:none;"></td>
-        </tr>
-        <tr>
-            <td colspan="4" class="bg-amarelo"><span class="lbl">SETOR/FUNÇÃO:</span><input type="text" id="f-setor" readonly></td>
-            <td colspan="3" class="bg-amarelo"><span class="lbl">CENTRO DE CUSTO:</span><input type="text" id="f-ccusto" readonly></td>
-            <td colspan="2" style="background:white; border-left:none;"></td>
-        </tr>
-        <tr>
-            <td colspan="4" class="bg-amarelo"><span class="lbl">DATA VIAGEM:</span><input type="text" id="f-saida"></td>
-            <td colspan="3" class="bg-amarelo"><span class="lbl">DATA DO RETORNO:</span><input type="text" id="f-retorno"></td>
-            <td colspan="2" style="background:white; border-left:none;"></td>
-        </tr>
-        <tr>
-            <td colspan="7" class="bg-amarelo"><span class="lbl">MOTIVO DA VIAGEM ou RDV:</span><input type="text" id="f-motivo"></td>
-            <td colspan="2" style="background:white; border-left:none;"></td>
-        </tr>
-        <tr>
-            <td colspan="3" class="td-adiant-label">VALOR DO ADIANTAMENTO RECEBIDO:</td>
-            <td colspan="4" class="td-adiant-valor">
-                <input type="text" id="f-adiantamento" value="R$ 0,00"
-                    style="background:#FFFF99; font-weight:bold; font-size:11px; text-align:center;"
-                    oninput="calcularSaldo()">
-            </td>
-            <td colspan="2" style="background:white; border-left:none;"></td>
-        </tr>
-        <tr>
-            <td colspan="7" style="text-align:center; font-weight:bold; font-size:9px; background:#D9D9D9; padding:4px;">
-                DISCRIMINAÇÃO DAS DESPESAS POR GRUPO:
-            </td>
-            <td colspan="2" style="text-align:center; font-weight:bold; font-size:9px; background:#D9D9D9;">TOTAL</td>
-        </tr>
-    </table>
-
-    <table class="rdv-table" id="tabela-despesas" style="border-top:none; margin-top:-1px;">
-        <colgroup>
-            <col style="width:110px">
-            <col><col><col><col><col><col>
-            <col style="width:85px">
-        </colgroup>
-    </table>
-
-    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
-        <tr>
-            <td colspan="7" class="td-soma-label">SOMA TOTAL DE DESPESAS:</td>
-            <td id="val-geral" class="td-soma-valor" style="width:88px;">R$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="td-saldo-label" style="padding:4px 8px;">SALDO:</td>
-            <td colspan="2" class="td-saldo-valor"><input type="text" id="val-saldo" readonly style="background:#FFFF99; font-weight:bold; font-size:11px; text-align:center;"></td>
-            <td colspan="4" class="td-saldo-desc">Saldo A PAGAR para o COLABORADOR</td>
-        </tr>
-        <tr>
-            <td colspan="8" class="td-aviso">
-                Junto com essa RDV, deverá anexar todas as notas e recibos comprobatórios.
-            </td>
-        </tr>
-    </table>
-
-    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
-        <tr>
-            <td rowspan="5" style="width:28%; text-align:center; font-weight:bold; font-size:8.5px; vertical-align:middle; background:#f0f0f0;">
-                INFORMAR OS DADOS BANCÁRIOS E<br>PREFERNCIALMENTE A CHAVE PIX
-            </td>
-            <td class="td-banco-label">Banco</td>
-            <td class="td-banco-input"><input type="text" id="f-banco"></td>
-            <td rowspan="2" style="width:28%; text-align:center; font-size:8px; font-weight:bold; background:#f0f0f0; vertical-align:middle;">
-                INFORME ABAIXO SE É CONTA<br>CORRENTE OU POUPANÇA
-            </td>
-        </tr>
-        <tr>
-            <td class="td-banco-label">Agência</td>
-            <td class="td-banco-input"><input type="text" id="f-ag"></td>
-        </tr>
-        <tr>
-            <td class="td-banco-label">Conta</td>
-            <td class="td-banco-input"><input type="text" id="f-conta"></td>
-            <td rowspan="3" style="text-align:center; vertical-align:middle; font-size:8px; background:#FFFF99; font-weight:bold; padding:6px;">
-                <select id="f-tipo" style="background:#FFFF99; font-weight:bold; font-size:9px; text-align:center; border:none; outline:none; width:100%;">
-                    <option value="cc">CORRENTE</option>
-                    <option value="cp">POUPANÇA</option>
-                </select>
-                <div style="font-size:7px; margin-top:4px; color:#666;">Informe o tipo de conta no botão</div>
-            </td>
-        </tr>
-        <tr>
-            <td class="td-banco-label">CPF</td>
-            <td class="td-banco-input"><input type="text" id="f-cpf"></td>
-        </tr>
-        <tr>
-            <td class="td-banco-label">PIX</td>
-            <td class="td-banco-input"><input type="text" id="f-pix"></td>
-        </tr>
-    </table>
-
-    <table class="rdv-table" style="border-top:none; margin-top:-1px;">
-        <tr>
-            <td class="td-declaracao">
-                DECLARO HAVER RECEBIDO NESTA DATA AS DESPESAS DE VIAGEM ACIMA ESPECIFICADAS
-            </td>
-        </tr>
-    </table>
-
-    <div style="margin-top: 22px; font-family: Arial, sans-serif;">
-        <div style="display: flex; gap: 50px; padding: 0 20px; margin-bottom: 32px;">
-            <div style="flex: 0 0 36%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 28px; font-size:10px; font-weight:bold; color:#c00; text-align:center; padding-bottom:3px;">
-                    <input type="text" id="f-data-ass" style="color:#c00; font-weight:bold; font-size:10px; width:100%; border:none; outline:none; background:transparent; font-family:Arial; text-align:center;">
-                </div>
-                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">DATA</div>
-            </div>
-            <div style="flex: 0 0 52%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
-                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
-            </div>
-        </div>
-        <div style="display: flex; gap: 50px; padding: 0 20px;">
-            <div style="flex: 0 0 36%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
-                <div style="font-size:9px; font-weight:bold; color:#000; text-align:center; margin-top:3px;">
-                    <span id="ass-nome"></span>
-                </div>
-                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:1px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
-            </div>
-            <div style="flex: 0 0 52%; text-align:center;">
-                <div style="border-bottom: 1px solid #000; min-height: 28px;"></div>
-                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:3px;">GESTOR ADM / FINANCEIRO</div>
-            </div>
-        </div>
-    </div>
-</div>
-```
-
-</div>
-
 <script>
 // =============================================
-// FIREBASE CONFIG
+// FIREBASE — RDV
 // =============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyDl0jgaPE86gMYfH1d56JlV293qi4vHoZ4",
-    authDomain: "rdv-s-40507.firebaseapp.com",
-    projectId: "rdv-s-40507",
-    storageBucket: "rdv-s-40507.firebasestorage.app",
-    messagingSenderId: "276888385688",
-    appId: "1:276888385688:web:a711cc3013e6975ef238ed"
-};
+const fireRDV = firebase.initializeApp({
+  apiKey: "AIzaSyDl0jgaPE86gMYfH1d56JlV293qi4vHoZ4",
+  authDomain: "rdv-s-40507.firebaseapp.com",
+  projectId: "rdv-s-40507",
+  storageBucket: "rdv-s-40507.firebasestorage.app",
+  messagingSenderId: "276888385688",
+  appId: "1:276888385688:web:a711cc3013e6975ef238ed"
+}, 'rdv');
 
-firebase.initializeApp(firebaseConfig);
-const db_fire = firebase.firestore();
+const fireBAIXADAS = firebase.initializeApp({
+  apiKey: "AIzaSyCU5jtbZ4WAMGHwe6Zo5Tcb8yy6ZrqpJ8s",
+  authDomain: "compra-de-baixada.firebaseapp.com",
+  projectId: "compra-de-baixada",
+  storageBucket: "compra-de-baixada.firebasestorage.app",
+  messagingSenderId: "41201677763",
+  appId: "1:41201677763:web:725b20d59800cf35b1b976"
+}, 'baixadas');
 
-const configRef   = db_fire.collection('config').doc('rdv_counter');
-const rdvsRef     = db_fire.collection('rdvs');
-const funcsRef    = db_fire.collection('funcionarios');
+const dbRDV      = fireRDV.firestore();
+const dbBaixadas = fireBAIXADAS.firestore();
+
+const configRef = dbRDV.collection('config').doc('rdv_counter');
+const rdvsRef   = dbRDV.collection('rdvs');
+const funcsRef  = dbRDV.collection('funcionarios');
+const folgasRef = dbBaixadas.collection('folgas');
 
 // =============================================
-// BANCO LOCAL (fallback) + CACHE FIREBASE
+// ESTADO GLOBAL
 // =============================================
-const dbLocal = [
-    { nome: "ADEMAR PAZ DE OLIVEIRA", setor: "PEDREIRO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "3775-3", conta: "20.315-7", cpf: "036.546.749-92", pix: "46 99919-9726", tipo: "cc" },
-    { nome: "ADEMILSON CEZAR DE OLIVEIRA", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "3081", conta: "104191", cpf: "022.041.439-44", pix: "022.041.439-44", tipo: "cc" },
-    { nome: "ANTONIO MICHEL PAZ", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "8277-5", conta: "3744-3", cpf: "121.604.569-00", pix: "42999501622", tipo: "cc" },
-    { nome: "ALCIONE GOMES DA SILVA", setor: "SOLDADOR DE FORMA", tipoCc: "OPERACIONAL", banco: "BRADESCO", agencia: "1052-9", conta: "1001786-6", cpf: "025.545.953-05", pix: "025.545.953-05", tipo: "cp" },
-    { nome: "CARLOS SANTOS MEDEIROS DE SOUZA", setor: "SOLDADOR", tipoCc: "OPERACIONAL", banco: "CAIXA", agencia: "4523", conta: "9166-5", cpf: "971.101.082-87", pix: "971.101.082-87", tipo: "cp" },
-    { nome: "CLESIO DE CARVALHO COSTA", setor: "AJUDANTE GERAL", tipoCc: "ADMINISTRAÇÃO", banco: "ITAU", agencia: "6329", conta: "70093-1", cpf: "688.049.622-91", pix: "688.049.622-91", tipo: "cc" },
-    { nome: "CLODOALDO ZAPAVOSKI COUTINHO", setor: "ENC. TERRAPLANAGEM", tipoCc: "OPERACIONAL", banco: "SICREDI", agencia: "0.307", conta: "00045959-2", cpf: "916.351.879-15", pix: "916.351.879-15", tipo: "cc" },
-    { nome: "DILVAR SOARES", setor: "OPERADOR RETRO", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "4036", conta: "16425", cpf: "026.849.889-00", pix: "guarasoares82@gmail.com", tipo: "cc" },
-    { nome: "DOUGLAS APARECIDO TESSAROLI", setor: "COORDENADOR ADMINISTRATIVO", tipoCc: "ADMINISTRAÇÃO", banco: "SANTANDER", agencia: "", conta: "", cpf: "063.572.4789-87", pix: "063.572.4789-87", tipo: "cp" },
-    { nome: "EDUARDO LUIS PIVA", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "1", conta: "53406518-0", cpf: "096.387.799-26", pix: "096.387.799-26", tipo: "cc" },
-    { nome: "ELERSON SOARES WEBER", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "1", conta: "11821435-0", cpf: "104.854.449-41", pix: "104.854.449-41", tipo: "cp" },
-    { nome: "EMANOEL LEONARDO MANGUEIRA DA SILVA", setor: "ELETRICISTA", tipoCc: "OPERACIONAL", banco: "SICREDI", agencia: "0727", conta: "60413-3", cpf: "035.125.342-44", pix: "035.125.342-44", tipo: "cc" },
-    { nome: "EQUIEL NATAN DA SILVA", setor: "ENCARREGADO DE RH", tipoCc: "ADMINISTRAÇÃO", banco: "NUBANK", agencia: "1", conta: "5925.7968-2", cpf: "106.269.829-01", pix: "106.269.829-01", tipo: "cc" },
-    { nome: "HELIEL KLEM", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "4095-9", conta: "7100379-5", cpf: "088.773.139-27", pix: "NÃO TEM", tipo: "cp" },
-    { nome: "JEAN AUGUSTO CAMARGO", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "SICREDI", agencia: "0703", conta: "10419-1", cpf: "088.773.139-27", pix: "NÃO TEM", tipo: "cc" },
-    { nome: "JOAO CARLOS FERNANDES", setor: "ENC. SESSAO TECNICA", tipoCc: "ADMINISTRAÇÃO", banco: "CAIXA", agencia: "0.391", conta: "580124312-3", cpf: "056.895.378-96", pix: "joaocarlos.seta@gmail.com", tipo: "cc" },
-    { nome: "JOAO PINTO DO NASCIMENTO", setor: "MOTORISTA COMBOIO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "8231-7", conta: "2980-7", cpf: "218.218.871-15", pix: "NÃO TEM", tipo: "cc" },
-    { nome: "JOAO ROBERTO BAIRROS", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "NUBANK", agencia: "", conta: "", cpf: "899.481.739-53", pix: "(49)99837-5098", tipo: "cc" },
-    { nome: "JOSE DE LIMA CAMARGO", setor: "MOTORISTA BASCULANTE", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "3857", conta: "86697-8", cpf: "989.550.129-34", pix: "989.550.129-34", tipo: "cc" },
-    { nome: "JOSE DHEIZOM MORAIS DA ROSA", setor: "COORD. SEGURANÇA", tipoCc: "ADMINISTRAÇÃO", banco: "BRASIL", agencia: "0.170", conta: "128737-0", cpf: "088.329.859-77", pix: "088.329.859-77", tipo: "cc" },
-    { nome: "JOSE JOSMAR FRANCA", setor: "MECANICO", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "1154-1", conta: "31811-6", cpf: "386.719.722-91", pix: "josejosmar24@gmail.com", tipo: "cc" },
-    { nome: "JOSE ROGERIO FREITAS DA SILVA", setor: "OPERADOR ESCAVADEIRA", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "", conta: "", cpf: "693.498.355-68", pix: "joserogeriojoserogerio11@gmail.com", tipo: "cc" },
-    { nome: "LUIZ HENRIQUE POLICENO ESCOBAR", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "PICPAY", agencia: "1", conta: "130961884-4", cpf: "125.457.209-09", pix: "(45) 99151-8090", tipo: "cp" },
-    { nome: "RAI GARAJAU DA SILVA", setor: "CARPINTEIRO", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "3027", conta: "64.606.193-3", cpf: "149.544.856-81", pix: "33999132151", tipo: "cp" },
-    { nome: "SIDNEI SIQUEIRA AVILA", setor: "ENC. CARPINTARIA", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "3764", conta: "32.643-9", cpf: "053.755.869-16", pix: "sidneisiqueiraavila@gmail.com", tipo: "cc" },
-    { nome: "TALISON MIGUEL DA SILVA", setor: "AJUDANTE GERAL", tipoCc: "ADMINISTRAÇÃO", banco: "NUBANK", agencia: "1", conta: "87810725-1", cpf: "514.431.188-18", pix: "talisonmiguel854@gmail.com", tipo: "cp" },
-    { nome: "VALDAIR ANTONIO MAIA DA SILVA", setor: "LIDER CARPINTARIA", tipoCc: "OPERACIONAL", banco: "SICOOB", agencia: "4370", conta: "700053", cpf: "065.248.539-11", pix: "45 99981-6411", tipo: "cc" },
-    { nome: "WILLIAN DE CAMPOS PEREIRA", setor: "AJUDANTE", tipoCc: "OPERACIONAL", banco: "BRADESCO", agencia: "5706", conta: "18615-5", cpf: "154.099.669-70", pix: "willianpereiracampos@icloud.com", tipo: "cp" },
-    { nome: "MARCELO MARTON MAC FADDEN", setor: "ENGENHEIRO RESIDENTE", tipoCc: "ADMINISTRAÇÃO", banco: "BRASIL", agencia: "470-7", conta: "38117-9", cpf: "000.000.000-00", pix: "marcelo@email.com", tipo: "cc" },
-    { nome: "MARTIM VIEIRA DA SILVA ARAÚJO", setor: "AJUDANTE GERAL", tipoCc: "OPERACIONAL", banco: "SANTANDER", agencia: "", conta: "", cpf: "069.591.883-42", pix: "069.591.883-42", tipo: "cp" },
-    { nome: "ABMAEL VIEIRA DE ARAUJO", setor: "PEDREIRO", tipoCc: "OPERACIONAL" },
-    { nome: "ADALTON DE OLIVEIRA", setor: "OPERADOR CENTRAL", tipoCc: "OPERACIONAL" },
-    { nome: "GILBERTO SAMUELSSON", setor: "ENCARREGADO GERAL", tipoCc: "OPERACIONAL" },
-    { nome: "GUILBER KAIRON CAMARGO", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "PIC PAY", agencia: "0001", conta: "90849858-6", cpf: "088.773.129-55", pix: "088.773.129-55", tipo: "cc" },
-    { nome: "FRANCISCO DA SILVA PEREIRA", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "BRASIL", agencia: "2409-0", conta: "25333-2", cpf: "774.647.103-04", pix: "NÃO TEM", tipo: "cc" },
-    { nome: "JOSE EDENILSON PIRES DA SILVA", setor: "ARMADOR", tipoCc: "OPERACIONAL", banco: "ITAU", agencia: "0862", conta: "83910-7", cpf: "073.544.759-47", pix: "NÃO TEM", tipo: "cc" },
-];
-
-// Cache em memória dos funcionários (Firebase + local)
 let dbFuncs = [];
 const rdvDataMap = {};
+let historicoBaixadas = [];
+let contadorPassagens = 0;
+const imagensPassagens = {};
 
 const categorias = ["PASSAGENS","ALIMENTAÇÃO","ALIMENTAÇÃO","PEDÁGIO","HOSPEDAGEM","COMBUSTIVEL","TAXI","ESTACIONAMENTO","OUTROS"];
 
 // =============================================
+// NAVEGAÇÃO
+// =============================================
+const titulos = {
+  'aba-rdv': 'RDV — Relatório de Despesas',
+  'aba-baixadas': 'Compra de Folgas / Baixadas',
+  'aba-funcionarios': 'Funcionários Cadastrados',
+  'aba-historico': 'Histórico Geral'
+};
+
+function irPara(id, navEl) {
+  document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('topbar-title').textContent = titulos[id] || '';
+  if (id === 'aba-historico') carregarHistoricoGeral();
+  if (id === 'aba-baixadas') carregarBaixadas();
+}
+
+// =============================================
 // UTILIDADES
 // =============================================
-function mostrarToast(msg, tipo = '') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast show ' + tipo;
-    setTimeout(() => { t.className = 'toast'; }, 3500);
+function toast(msg, tipo = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + tipo;
+  setTimeout(() => { t.className = 'toast'; }, 3500);
 }
+
+function fmtBRL(v) {
+  if (!v && v !== 0) return '—';
+  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function fecharModal(id) { document.getElementById(id).classList.remove('show'); }
+function fecharModalClick(e, id) { if (e.target === document.getElementById(id)) fecharModal(id); }
 
 function setStatus(estado, texto) {
-    document.getElementById('status-dot').className = 'status-dot ' + estado;
-    document.getElementById('status-txt').textContent = texto;
+  document.getElementById('status-dot').className = 'status-dot ' + estado;
+  document.getElementById('status-txt').textContent = texto;
 }
 
 // =============================================
-// FUNCIONÁRIOS — FIREBASE
+// FUNCIONÁRIOS
 // =============================================
 async function carregarFuncionarios() {
-    try {
-        const snap = await funcsRef.orderBy('nome', 'asc').get();
-        const doFirebase = [];
-        snap.forEach(doc => doFirebase.push({ id: doc.id, ...doc.data() }));
-
-        if (doFirebase.length === 0) {
-            // Primeira vez: migrar dbLocal para Firebase
-            await migrarFuncionariosLocais();
-            return;
-        }
-
-        dbFuncs = doFirebase;
-        atualizarDatalist();
-        renderizarFuncs();
-        document.getElementById('card-funcs').innerText = dbFuncs.length;
-    } catch (e) {
-        // Fallback local
-        dbFuncs = dbLocal.map(f => ({ ...f }));
-        atualizarDatalist();
-        renderizarFuncs();
-        document.getElementById('card-funcs').innerText = dbFuncs.length;
-        mostrarToast('⚠️ Usando lista local (Firebase indisponível)', 'erro');
-    }
+  try {
+    const snap = await funcsRef.orderBy('nome', 'asc').get();
+    dbFuncs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (dbFuncs.length === 0) { await migrarFuncionariosLocais(); return; }
+    atualizarDatalist();
+    renderFuncs();
+    const n = dbFuncs.length;
+    document.getElementById('card-funcs').textContent = n;
+    document.getElementById('nav-badge-funcs').textContent = n;
+  } catch(e) {
+    toast('⚠️ Erro ao carregar funcionários: ' + e.message, 'erro');
+  }
 }
 
+const dbLocal = [
+  { nome:"ADEMAR PAZ DE OLIVEIRA",setor:"PEDREIRO",tipoCc:"OPERACIONAL",banco:"BRASIL",agencia:"3775-3",conta:"20.315-7",cpf:"036.546.749-92",pix:"46 99919-9726",tipo:"cc"},
+  { nome:"ADEMILSON CEZAR DE OLIVEIRA",setor:"MOTORISTA BASCULANTE",tipoCc:"OPERACIONAL",banco:"SICOOB",agencia:"3081",conta:"104191",cpf:"022.041.439-44",pix:"022.041.439-44",tipo:"cc"},
+  { nome:"ANTONIO MICHEL PAZ",setor:"ARMADOR",tipoCc:"OPERACIONAL",banco:"BRASIL",agencia:"8277-5",conta:"3744-3",cpf:"121.604.569-00",pix:"42999501622",tipo:"cc"},
+  { nome:"ALCIONE GOMES DA SILVA",setor:"SOLDADOR DE FORMA",tipoCc:"OPERACIONAL",banco:"BRADESCO",agencia:"1052-9",conta:"1001786-6",cpf:"025.545.953-05",pix:"025.545.953-05",tipo:"cp"},
+  { nome:"CARLOS SANTOS MEDEIROS DE SOUZA",setor:"SOLDADOR",tipoCc:"OPERACIONAL",banco:"CAIXA",agencia:"4523",conta:"9166-5",cpf:"971.101.082-87",pix:"971.101.082-87",tipo:"cp"},
+  { nome:"CLESIO DE CARVALHO COSTA",setor:"AJUDANTE GERAL",tipoCc:"ADMINISTRAÇÃO",banco:"ITAU",agencia:"6329",conta:"70093-1",cpf:"688.049.622-91",pix:"688.049.622-91",tipo:"cc"},
+  { nome:"CLODOALDO ZAPAVOSKI COUTINHO",setor:"ENC. TERRAPLANAGEM",tipoCc:"OPERACIONAL",banco:"SICREDI",agencia:"0.307",conta:"00045959-2",cpf:"916.351.879-15",pix:"916.351.879-15",tipo:"cc"},
+  { nome:"DILVAR SOARES",setor:"OPERADOR RETRO",tipoCc:"OPERACIONAL",banco:"ITAU",agencia:"4036",conta:"16425",cpf:"026.849.889-00",pix:"guarasoares82@gmail.com",tipo:"cc"},
+  { nome:"DOUGLAS APARECIDO TESSAROLI",setor:"COORDENADOR ADMINISTRATIVO",tipoCc:"ADMINISTRAÇÃO",banco:"SANTANDER",agencia:"",conta:"",cpf:"063.572.4789-87",pix:"063.572.4789-87",tipo:"cp"},
+  { nome:"EDUARDO LUIS PIVA",setor:"OPERADOR ESCAVADEIRA",tipoCc:"OPERACIONAL",banco:"NUBANK",agencia:"1",conta:"53406518-0",cpf:"096.387.799-26",pix:"096.387.799-26",tipo:"cc"},
+  { nome:"EQUIEL NATAN DA SILVA",setor:"ENCARREGADO DE RH",tipoCc:"ADMINISTRAÇÃO",banco:"NUBANK",agencia:"1",conta:"5925.7968-2",cpf:"106.269.829-01",pix:"106.269.829-01",tipo:"cc"},
+  { nome:"JOAO CARLOS FERNANDES",setor:"ENC. SESSAO TECNICA",tipoCc:"ADMINISTRAÇÃO",banco:"CAIXA",agencia:"0.391",conta:"580124312-3",cpf:"056.895.378-96",pix:"joaocarlos.seta@gmail.com",tipo:"cc"},
+  { nome:"JOSE DHEIZOM MORAIS DA ROSA",setor:"COORD. SEGURANÇA",tipoCc:"ADMINISTRAÇÃO",banco:"BRASIL",agencia:"0.170",conta:"128737-0",cpf:"088.329.859-77",pix:"088.329.859-77",tipo:"cc"},
+  { nome:"MARCELO MARTON MAC FADDEN",setor:"ENGENHEIRO RESIDENTE",tipoCc:"ADMINISTRAÇÃO",banco:"BRASIL",agencia:"470-7",conta:"38117-9",cpf:"000.000.000-00",pix:"marcelo@email.com",tipo:"cc"},
+  { nome:"GILBERTO SAMUELSSON",setor:"ENCARREGADO GERAL",tipoCc:"OPERACIONAL"},
+];
+
 async function migrarFuncionariosLocais() {
-    try {
-        mostrarToast('📤 Migrando funcionários para Firebase...', '');
-        const batch = db_fire.batch();
-        dbLocal.forEach(f => {
-            const ref = funcsRef.doc();
-            batch.set(ref, {
-                nome: f.nome,
-                setor: f.setor || '',
-                tipoCc: f.tipoCc || 'OPERACIONAL',
-                banco: f.banco || '',
-                agencia: f.agencia || '',
-                conta: f.conta || '',
-                cpf: f.cpf || '',
-                pix: f.pix || '',
-                tipo: f.tipo || 'cc',
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        });
-        await batch.commit();
-        mostrarToast('✅ Funcionários migrados com sucesso!', 'sucesso');
-        await carregarFuncionarios();
-    } catch (e) {
-        dbFuncs = dbLocal.map(f => ({ ...f }));
-        atualizarDatalist();
-        renderizarFuncs();
-        mostrarToast('⚠️ Migração falhou, usando local', 'erro');
-    }
+  try {
+    toast('📤 Migrando funcionários para Firebase...');
+    const batch = dbRDV.batch();
+    dbLocal.forEach(f => { const ref = funcsRef.doc(); batch.set(ref, { ...f, criadoEm: firebase.firestore.FieldValue.serverTimestamp() }); });
+    await batch.commit();
+    toast('✅ Funcionários migrados!', 'sucesso');
+    await carregarFuncionarios();
+  } catch(e) {
+    dbFuncs = dbLocal.map(f => ({...f}));
+    atualizarDatalist(); renderFuncs();
+  }
 }
 
 function atualizarDatalist() {
-    const dl = document.getElementById('lista-func');
+  ['lista-func', 'lista-func-baixadas'].forEach(id => {
+    const dl = document.getElementById(id);
+    if (!dl) return;
     dl.innerHTML = '';
     dbFuncs.sort((a,b) => a.nome.localeCompare(b.nome)).forEach(f => {
-        const o = document.createElement('option');
-        o.value = f.nome;
-        dl.appendChild(o);
+      const o = document.createElement('option'); o.value = f.nome; dl.appendChild(o);
     });
+  });
 }
 
-function renderizarFuncs(filtro = '') {
-    const lista = document.getElementById('funcs-lista');
-    const termo = filtro.toLowerCase();
-    const exibir = dbFuncs
-        .filter(f => !termo || f.nome.toLowerCase().includes(termo) || (f.setor||'').toLowerCase().includes(termo))
-        .sort((a,b) => a.nome.localeCompare(b.nome));
-
-    if (exibir.length === 0) {
-        lista.innerHTML = '<div class="historico-vazio">Nenhum funcionário encontrado.</div>';
-        return;
-    }
-
-    lista.innerHTML = '';
-    exibir.forEach(f => {
-        const div = document.createElement('div');
-        div.className = 'func-item';
-
-        const badgeClass = f.tipoCc === 'ADMINISTRAÇÃO' ? 'func-badge' : 'func-badge func-badge-op';
-        div.innerHTML = `
-            <span class="func-nome">${f.nome}</span>
-            <span class="func-setor">${f.setor || '—'}</span>
-            <span class="${badgeClass}">${f.tipoCc || '—'}</span>
-        `;
-
-        const btnEdit = document.createElement('button');
-        btnEdit.className = 'btn-edit-func';
-        btnEdit.textContent = '✏️ Editar';
-        btnEdit.addEventListener('click', () => abrirCadastro(f));
-
-        const btnDel = document.createElement('button');
-        btnDel.className = 'btn-del-func';
-        btnDel.textContent = '🗑️';
-        btnDel.addEventListener('click', () => excluirFuncionario(f));
-
-        div.appendChild(btnEdit);
-        div.appendChild(btnDel);
-        lista.appendChild(div);
-    });
+function renderFuncs(filtro = '') {
+  const tbody = document.getElementById('funcs-lista');
+  const termo = filtro.toLowerCase();
+  const lista = dbFuncs.filter(f => !termo || f.nome.toLowerCase().includes(termo) || (f.setor||'').toLowerCase().includes(termo))
+    .sort((a,b) => a.nome.localeCompare(b.nome));
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="6" class="vazio">Nenhum funcionário encontrado.</td></tr>'; return; }
+  tbody.innerHTML = lista.map(f => `
+    <tr>
+      <td style="font-weight:700;color:var(--azul)">${f.nome}</td>
+      <td>${f.setor || '—'}</td>
+      <td><span class="badge ${f.tipoCc==='ADMINISTRAÇÃO'?'badge-adm':'badge-op'}">${f.tipoCc||'—'}</span></td>
+      <td>${f.banco||'—'}</td>
+      <td style="font-size:11px;">${f.pix||'—'}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="abrirCadastroById('${f.id||''}')">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirFuncionarioById('${f.id||''}','${f.nome}')">🗑️</button>
+      </td>
+    </tr>`).join('');
 }
 
-function filtrarFuncs() {
-    renderizarFuncs(document.getElementById('busca-func').value);
+function filtrarFuncs() { renderFuncs(document.getElementById('busca-func').value); }
+
+function abrirCadastroById(id) {
+  const f = dbFuncs.find(x => x.id === id);
+  abrirCadastro(f || null);
 }
 
-// =============================================
-// MODAL CADASTRO
-// =============================================
 function abrirCadastro(func) {
-    const modal = document.getElementById('modal-cad');
-    const titulo = document.getElementById('cad-titulo');
-
-    // Limpar campos
-    ['cad-nome','cad-setor','cad-cpf','cad-pix','cad-banco','cad-ag','cad-conta','cad-doc-id'].forEach(id => {
-        document.getElementById(id).value = '';
-    });
-    document.getElementById('cad-cc').value   = 'OPERACIONAL';
-    document.getElementById('cad-tipo').value = 'cc';
-
-    if (func) {
-        titulo.textContent = '✏️ Editar Funcionário';
-        document.getElementById('cad-doc-id').value = func.id || '';
-        document.getElementById('cad-nome').value   = func.nome   || '';
-        document.getElementById('cad-setor').value  = func.setor  || '';
-        document.getElementById('cad-cc').value     = func.tipoCc || 'OPERACIONAL';
-        document.getElementById('cad-cpf').value    = func.cpf    || '';
-        document.getElementById('cad-pix').value    = func.pix    || '';
-        document.getElementById('cad-banco').value  = func.banco  || '';
-        document.getElementById('cad-ag').value     = func.agencia|| '';
-        document.getElementById('cad-conta').value  = func.conta  || '';
-        document.getElementById('cad-tipo').value   = func.tipo   || 'cc';
-    } else {
-        titulo.textContent = '➕ Cadastrar Funcionário';
-    }
-
-    modal.classList.add('show');
-}
-
-function fecharModalCad(e) {
-    if (e.target === document.getElementById('modal-cad')) {
-        document.getElementById('modal-cad').classList.remove('show');
-    }
+  ['cad-nome','cad-setor','cad-cpf','cad-pix','cad-banco','cad-ag','cad-conta','cad-doc-id'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('cad-cc').value = 'OPERACIONAL';
+  document.getElementById('cad-tipo').value = 'cc';
+  if (func) {
+    document.getElementById('cad-titulo').textContent = '✏️ Editar Funcionário';
+    document.getElementById('cad-doc-id').value = func.id || '';
+    document.getElementById('cad-nome').value   = func.nome   || '';
+    document.getElementById('cad-setor').value  = func.setor  || '';
+    document.getElementById('cad-cc').value     = func.tipoCc || 'OPERACIONAL';
+    document.getElementById('cad-cpf').value    = func.cpf    || '';
+    document.getElementById('cad-pix').value    = func.pix    || '';
+    document.getElementById('cad-banco').value  = func.banco  || '';
+    document.getElementById('cad-ag').value     = func.agencia|| '';
+    document.getElementById('cad-conta').value  = func.conta  || '';
+    document.getElementById('cad-tipo').value   = func.tipo   || 'cc';
+  } else {
+    document.getElementById('cad-titulo').textContent = '➕ Cadastrar Funcionário';
+  }
+  document.getElementById('modal-cad').classList.add('show');
 }
 
 async function salvarFuncionario() {
-    const btn = document.getElementById('btn-salvar-cad');
-    const nome  = document.getElementById('cad-nome').value.trim().toUpperCase();
-    const setor = document.getElementById('cad-setor').value.trim().toUpperCase();
-    const tipoCc = document.getElementById('cad-cc').value;
-
-    if (!nome || !setor) {
-        mostrarToast('⚠️ Nome e Função são obrigatórios!', 'erro');
-        return;
+  const btn = document.getElementById('btn-salvar-cad');
+  const nome  = document.getElementById('cad-nome').value.trim().toUpperCase();
+  const setor = document.getElementById('cad-setor').value.trim().toUpperCase();
+  if (!nome || !setor) { toast('⚠️ Nome e Função obrigatórios!', 'erro'); return; }
+  const dados = { nome, setor, tipoCc: document.getElementById('cad-cc').value, cpf: document.getElementById('cad-cpf').value.trim(), pix: document.getElementById('cad-pix').value.trim(), banco: document.getElementById('cad-banco').value.trim().toUpperCase(), agencia: document.getElementById('cad-ag').value.trim(), conta: document.getElementById('cad-conta').value.trim(), tipo: document.getElementById('cad-tipo').value };
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvando...';
+  try {
+    const docId = document.getElementById('cad-doc-id').value;
+    if (docId) {
+      await funcsRef.doc(docId).update({ ...dados, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+      const idx = dbFuncs.findIndex(f => f.id === docId);
+      if (idx !== -1) dbFuncs[idx] = { id: docId, ...dados };
+      toast(`✅ ${nome} atualizado!`, 'sucesso');
+    } else {
+      if (dbFuncs.some(f => f.nome === nome)) { toast('⚠️ Nome já cadastrado!', 'erro'); btn.disabled = false; btn.textContent = '💾 SALVAR FUNCIONÁRIO'; return; }
+      const ref = await funcsRef.add({ ...dados, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+      dbFuncs.push({ id: ref.id, ...dados });
+      toast(`✅ ${nome} cadastrado!`, 'sucesso');
     }
-
-    const dados = {
-        nome,
-        setor,
-        tipoCc,
-        cpf:     document.getElementById('cad-cpf').value.trim(),
-        pix:     document.getElementById('cad-pix').value.trim(),
-        banco:   document.getElementById('cad-banco').value.trim().toUpperCase(),
-        agencia: document.getElementById('cad-ag').value.trim(),
-        conta:   document.getElementById('cad-conta').value.trim(),
-        tipo:    document.getElementById('cad-tipo').value,
-    };
-
-    btn.disabled = true;
-    btn.textContent = '⏳ Salvando...';
-
-    try {
-        const docId = document.getElementById('cad-doc-id').value;
-
-        if (docId) {
-            // EDITAR
-            await funcsRef.doc(docId).update({ ...dados, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
-            const idx = dbFuncs.findIndex(f => f.id === docId);
-            if (idx !== -1) dbFuncs[idx] = { id: docId, ...dados };
-            mostrarToast(`✅ ${nome} atualizado!`, 'sucesso');
-        } else {
-            // NOVO
-            const nomeExiste = dbFuncs.some(f => f.nome === nome);
-            if (nomeExiste) {
-                mostrarToast('⚠️ Já existe um funcionário com este nome!', 'erro');
-                btn.disabled = false;
-                btn.textContent = '💾 SALVAR FUNCIONÁRIO';
-                return;
-            }
-            const ref = await funcsRef.add({ ...dados, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
-            dbFuncs.push({ id: ref.id, ...dados });
-            mostrarToast(`✅ ${nome} cadastrado com sucesso!`, 'sucesso');
-        }
-
-        atualizarDatalist();
-        renderizarFuncs(document.getElementById('busca-func').value);
-        document.getElementById('card-funcs').innerText = dbFuncs.length;
-        document.getElementById('modal-cad').classList.remove('show');
-
-    } catch (e) {
-        mostrarToast('⚠️ Erro ao salvar: ' + e.message, 'erro');
-    }
-
-    btn.disabled = false;
-    btn.textContent = '💾 SALVAR FUNCIONÁRIO';
+    atualizarDatalist(); renderFuncs(document.getElementById('busca-func').value);
+    const n = dbFuncs.length;
+    document.getElementById('card-funcs').textContent = n;
+    document.getElementById('nav-badge-funcs').textContent = n;
+    fecharModal('modal-cad');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
+  btn.disabled = false; btn.textContent = '💾 SALVAR FUNCIONÁRIO';
 }
 
-async function excluirFuncionario(func) {
-    if (!confirm(`Excluir "${func.nome}"?\nEsta ação não pode ser desfeita.`)) return;
-    try {
-        if (func.id) await funcsRef.doc(func.id).delete();
-        dbFuncs = dbFuncs.filter(f => f.nome !== func.nome);
-        atualizarDatalist();
-        renderizarFuncs(document.getElementById('busca-func').value);
-        document.getElementById('card-funcs').innerText = dbFuncs.length;
-        mostrarToast(`🗑️ ${func.nome} removido.`, 'sucesso');
-    } catch (e) {
-        mostrarToast('⚠️ Erro ao excluir: ' + e.message, 'erro');
-    }
+async function excluirFuncionarioById(id, nome) {
+  if (!confirm(`Excluir "${nome}"?`)) return;
+  try {
+    if (id) await funcsRef.doc(id).delete();
+    dbFuncs = dbFuncs.filter(f => f.id !== id);
+    atualizarDatalist(); renderFuncs();
+    const n = dbFuncs.length;
+    document.getElementById('card-funcs').textContent = n;
+    document.getElementById('nav-badge-funcs').textContent = n;
+    toast(`🗑️ ${nome} removido.`, 'sucesso');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
 }
 
 // =============================================
-// FIREBASE: CARREGAR ESTADO
+// RDV — FIREBASE
 // =============================================
-async function carregarEstadoFirebase() {
-    try {
-        setStatus('', 'Conectando...');
-        const snap = await configRef.get();
-        let numAtual;
-        if (!snap.exists) {
-            await configRef.set({ ultimoRDV: "066", totalGerados: 0 });
-            numAtual = "066";
-        } else {
-            numAtual = snap.data().ultimoRDV || "066";
-        }
-        document.getElementById('card-rdv').innerText    = numAtual;
-        document.getElementById('txt-num-rdv').innerText = numAtual;
-
-        const rdvsSnap = await rdvsRef.orderBy('criadoEm', 'desc').limit(50).get();
-        document.getElementById('card-count').innerText = rdvsSnap.size;
-        document.getElementById('card-sync').innerText  = '✓';
-
-        setStatus('online', 'Firebase Online');
-        renderizarHistorico(rdvsSnap);
-        mostrarToast('✅ Conectado ao Firebase!', 'sucesso');
-    } catch (e) {
-        setStatus('erro', 'Erro de conexão');
-        mostrarToast('⚠️ Erro Firebase: ' + e.message, 'erro');
-        const n = localStorage.getItem('ultimoRDV') || "066";
-        document.getElementById('card-rdv').innerText    = n;
-        document.getElementById('txt-num-rdv').innerText = n;
-        const usados = JSON.parse(localStorage.getItem('rdvsUsados') || "[]");
-        document.getElementById('card-count').innerText = usados.length;
-        document.getElementById('card-sync').innerText  = '✗';
-    }
+async function carregarEstadoRDV() {
+  try {
+    setStatus('', 'Conectando...');
+    const snap = await configRef.get();
+    let numAtual;
+    if (!snap.exists) { await configRef.set({ ultimoRDV: "066", totalGerados: 0 }); numAtual = "066"; }
+    else numAtual = snap.data().ultimoRDV || "066";
+    document.getElementById('card-rdv').textContent = numAtual;
+    document.getElementById('txt-num-rdv').textContent = numAtual;
+    const rdvsSnap = await rdvsRef.orderBy('criadoEm', 'desc').limit(50).get();
+    const cnt = rdvsSnap.size;
+    document.getElementById('card-count').textContent = cnt;
+    document.getElementById('nav-badge-rdv').textContent = cnt;
+    document.getElementById('card-sync').textContent = '✓';
+    setStatus('online', 'Firebase Online');
+    renderHistoricoRDV(rdvsSnap);
+    toast('✅ Conectado ao Firebase!', 'sucesso');
+  } catch(e) {
+    setStatus('erro', 'Erro de conexão');
+    toast('⚠️ Erro Firebase: ' + e.message, 'erro');
+    const n = localStorage.getItem('ultimoRDV') || "066";
+    document.getElementById('card-rdv').textContent = n;
+    document.getElementById('txt-num-rdv').textContent = n;
+  }
 }
 
-// =============================================
-// FIREBASE: HISTÓRICO
-// =============================================
-function fmtBRL(v) {
-    if (!v && v !== 0) return '—';
-    return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function abrirModal(d) {
+function renderHistoricoRDV(snap) {
+  const tbody = document.getElementById('historico-lista');
+  if (snap.empty) { tbody.innerHTML = '<tr><td colspan="7" class="vazio">Nenhum RDV gerado ainda.</td></tr>'; return; }
+  tbody.innerHTML = '';
+  snap.forEach(doc => {
+    const d = doc.data(); const docId = doc.id;
+    rdvDataMap[docId] = d;
+    const dt = d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '--';
     const saldo = d.saldo || 0;
-    const saldoClass = saldo >= 0 ? 'mv-verde' : 'mv-vermelho';
-    const saldoLabel = saldo >= 0 ? '💰 A PAGAR ao colaborador' : '🔄 A DEVOLVER';
-    const icones = { 'PASSAGENS':'✈️','ALIMENTAÇÃO':'🍽️','PEDÁGIO':'🛣️','HOSPEDAGEM':'🏨','COMBUSTIVEL':'⛽','TAXI':'🚕','ESTACIONAMENTO':'🅿️','OUTROS':'📦' };
-    let catHtml = '';
-    if (d.despesasCat && Object.keys(d.despesasCat).length > 0) {
-        catHtml += '<div class="modal-linha" style="background:#f0f4ff;margin:8px -4px 4px;padding:6px 8px;border-radius:6px;font-weight:800;color:#0a1f3d;font-size:12px;">📋 DESPESAS POR CATEGORIA</div>';
-        for (const [cat, val] of Object.entries(d.despesasCat)) {
-            if (val > 0) catHtml += `<div class="modal-linha" style="padding-left:8px;"><span class="ml">${icones[cat]||'•'} ${cat}</span><span class="mv" style="color:#1a3a6b;">${fmtBRL(val)}</span></div>`;
-        }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:800;color:var(--azul)">#${d.numero}</td>
+      <td style="font-weight:700">${d.colaborador||'---'}</td>
+      <td>${d.destino||'—'}</td>
+      <td>${d.totalDespesas !== undefined ? fmtBRL(d.totalDespesas) : '—'}</td>
+      <td><span class="badge ${saldo>=0?'badge-ok':'badge-rev'}">${fmtBRL(Math.abs(saldo))}</span></td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${dt}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" data-id="${docId}">VER</button>
+        <button class="btn btn-danger btn-sm" data-del="${docId}" data-num="${d.numero}" data-col="${d.colaborador||''}">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+    tr.querySelector('[data-id]').addEventListener('click', () => abrirModalRDV(rdvDataMap[docId]));
+    tr.querySelector('[data-del]').addEventListener('click', () => apagarRDV(docId, d.numero, d.colaborador));
+  });
+}
+
+function abrirModalRDV(d) {
+  const saldo = d.saldo || 0;
+  const icones = {'PASSAGENS':'✈️','ALIMENTAÇÃO':'🍽️','PEDÁGIO':'🛣️','HOSPEDAGEM':'🏨','COMBUSTIVEL':'⛽','TAXI':'🚕','ESTACIONAMENTO':'🅿️','OUTROS':'📦'};
+  let catHtml = '';
+  if (d.despesasCat && Object.keys(d.despesasCat).length > 0) {
+    catHtml += '<div class="modal-linha" style="background:#f0f4ff;padding:6px 8px;border-radius:6px;font-weight:800;color:var(--azul);font-size:12px;">📋 DESPESAS POR CATEGORIA</div>';
+    for (const [cat, val] of Object.entries(d.despesasCat)) {
+      if (val > 0) catHtml += `<div class="modal-linha" style="padding-left:8px;"><span class="ml">${icones[cat]||'•'} ${cat}</span><span class="mv" style="color:var(--azul);">${fmtBRL(val)}</span></div>`;
     }
-    document.getElementById('modal-titulo').innerHTML = `📄 RDV #${d.numero} — ${d.colaborador || '---'}`;
-    document.getElementById('modal-conteudo').innerHTML = `
-        <div class="modal-linha"><span class="ml">👤 Colaborador</span><span class="mv">${d.colaborador||'—'}</span></div>
-        <div class="modal-linha"><span class="ml">🏗️ Setor</span><span class="mv">${d.setor||'—'}</span></div>
-        <div class="modal-linha"><span class="ml">📍 Destino</span><span class="mv">${d.destino||'—'}</span></div>
-        <div class="modal-linha"><span class="ml">📝 Motivo</span><span class="mv">${d.motivo||'—'}</span></div>
-        <div class="modal-linha"><span class="ml">📅 Data</span><span class="mv">${d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '—'}</span></div>
-        ${catHtml}
-        <div class="modal-linha" style="margin-top:8px;border-top:2px solid #ddd;padding-top:8px;"><span class="ml" style="font-weight:800;">💵 TOTAL DESPESAS</span><span class="mv mv-verde">${fmtBRL(d.totalDespesas)}</span></div>
-        <div class="modal-linha"><span class="ml">➖ Adiantamento</span><span class="mv">${fmtBRL(d.adiantamento)}</span></div>
-        <div class="modal-linha" style="border-top:2px solid #ddd;margin-top:4px;padding-top:8px;background:#fffbe6;margin:4px -4px 0;padding:8px 8px;border-radius:6px;">
-            <span class="ml" style="font-weight:800;font-size:13px;">${saldoLabel}</span>
-            <span class="mv ${saldoClass}" style="font-size:16px;">${fmtBRL(Math.abs(saldo))}</span>
-        </div>`;
-    document.getElementById('modal-overlay').classList.add('show');
+  }
+  document.getElementById('modal-rdv-titulo').innerHTML = `📄 RDV #${d.numero} — ${d.colaborador||'---'}`;
+  document.getElementById('modal-rdv-corpo').innerHTML = `
+    <div class="modal-linha"><span class="ml">👤 Colaborador</span><span class="mv">${d.colaborador||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">🏗️ Setor</span><span class="mv">${d.setor||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">📍 Destino</span><span class="mv">${d.destino||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">📝 Motivo</span><span class="mv">${d.motivo||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">📅 Data</span><span class="mv">${d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '—'}</span></div>
+    ${catHtml}
+    <div class="modal-linha" style="margin-top:8px;border-top:2px solid #ddd;padding-top:8px;"><span class="ml" style="font-weight:800;">💵 TOTAL DESPESAS</span><span class="mv mv-verde">${fmtBRL(d.totalDespesas)}</span></div>
+    <div class="modal-linha"><span class="ml">➖ Adiantamento</span><span class="mv">${fmtBRL(d.adiantamento)}</span></div>
+    <div class="modal-linha" style="border-top:2px solid #ddd;margin-top:4px;padding-top:8px;">
+      <span class="ml" style="font-weight:800;">${saldo>=0?'💰 A PAGAR ao colaborador':'🔄 A DEVOLVER'}</span>
+      <span class="mv ${saldo>=0?'mv-verde':'mv-verm'}" style="font-size:16px;">${fmtBRL(Math.abs(saldo))}</span>
+    </div>`;
+  document.getElementById('modal-rdv').classList.add('show');
 }
 
-function fecharModal(e) {
-    if (e.target === document.getElementById('modal-overlay'))
-        document.getElementById('modal-overlay').classList.remove('show');
+async function apagarRDV(docId, numero, colaborador) {
+  if (!confirm(`Apagar RDV #${numero} de ${colaborador}?`)) return;
+  try {
+    await rdvsRef.doc(docId).delete();
+    const row = document.querySelector(`[data-del="${docId}"]`)?.closest('tr');
+    if (row) row.remove();
+    const cnt = Math.max(0, (parseInt(document.getElementById('card-count').textContent)||0) - 1);
+    document.getElementById('card-count').textContent = cnt;
+    document.getElementById('nav-badge-rdv').textContent = cnt;
+    toast(`🗑️ RDV #${numero} apagado!`, 'sucesso');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
 }
 
-function renderizarHistorico(snap) {
-    const lista = document.getElementById('historico-lista');
-    if (snap.empty) { lista.innerHTML = '<div class="historico-vazio">Nenhum RDV gerado ainda.</div>'; return; }
-    lista.innerHTML = '';
-    snap.forEach(doc => {
-        const d = doc.data(); const docId = doc.id;
-        rdvDataMap[docId] = d;
-        const dt = d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '--';
-        const saldo = d.saldo || 0;
-        const item = document.createElement('div');
-        item.id = 'item-' + docId;
-        item.className = 'historico-item';
-        const btnVer = document.createElement('button'); btnVer.className = 'btn-ver'; btnVer.textContent = 'VER';
-        btnVer.addEventListener('click', () => abrirModal(rdvDataMap[docId]));
-        const btnDel = document.createElement('button'); btnDel.className = 'btn-del-item'; btnDel.textContent = '🗑️';
-        btnDel.addEventListener('click', () => apagarRDV(docId, d.numero, d.colaborador));
-        item.innerHTML = `
-            <span class="rdv-num">#${d.numero}</span>
-            <span class="rdv-info">${d.colaborador||'---'}</span>
-            ${d.totalDespesas !== undefined ? `<span class="rdv-valor">${fmtBRL(d.totalDespesas)}</span>` : ''}
-            ${d.totalDespesas !== undefined ? `<span class="${saldo>=0?'rdv-saldo-pos':'rdv-saldo-neg'}">Saldo: ${fmtBRL(Math.abs(saldo))}</span>` : ''}
-            <span class="rdv-data">${dt}</span>`;
-        item.appendChild(btnVer); item.appendChild(btnDel);
-        lista.appendChild(item);
-    });
+async function apagarHistorico() {
+  if (!confirm("⚠️ Apagar TODO o histórico de RDVs?")) return;
+  if (!confirm("🔴 CONFIRMAÇÃO FINAL?")) return;
+  try {
+    const snap = await rdvsRef.get();
+    const batch = dbRDV.batch();
+    snap.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    await configRef.update({ totalGerados: 0 });
+    document.getElementById('historico-lista').innerHTML = '<tr><td colspan="7" class="vazio">Nenhum RDV.</td></tr>';
+    document.getElementById('card-count').textContent = '0';
+    document.getElementById('nav-badge-rdv').textContent = '0';
+    toast('✅ Histórico apagado!', 'sucesso');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
 }
 
-// =============================================
-// FIREBASE: SALVAR RDV
-// =============================================
-async function salvarRDVFirebase(numero, colaborador, setor, motivo, totalDespesas, adiantamento, saldo, despesasCat) {
-    try {
-        await rdvsRef.add({ numero, colaborador, setor, motivo, totalDespesas: totalDespesas||0, adiantamento: adiantamento||0, saldo: saldo||0, destino: document.getElementById('f-destino').value||'', despesasCat: despesasCat||{}, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
-        const prox = String(parseInt(numero) + 1).padStart(3, '0');
-        await configRef.update({ ultimoRDV: prox, totalGerados: firebase.firestore.FieldValue.increment(1) });
-        mostrarToast(`✅ RDV #${numero} salvo na nuvem!`, 'sucesso');
-        return true;
-    } catch (e) {
-        mostrarToast('⚠️ Erro ao salvar no Firebase: ' + e.message, 'erro');
-        return false;
-    }
-}
-
-async function rdvJaUsado(numero) {
-    try {
-        const snap = await rdvsRef.where('numero', '==', numero).get();
-        return !snap.empty;
-    } catch (e) {
-        return JSON.parse(localStorage.getItem('rdvsUsados') || "[]").includes(numero);
-    }
+async function ajustarNumeroManual() {
+  let novo = prompt("Novo número sequencial do RDV (ex: 066):");
+  if (!novo) return;
+  const formatado = novo.padStart(3, '0');
+  try {
+    await configRef.update({ ultimoRDV: formatado });
+    document.getElementById('card-rdv').textContent = formatado;
+    document.getElementById('txt-num-rdv').textContent = formatado;
+    toast(`Nº RDV → ${formatado}`, 'sucesso');
+  } catch(e) { toast('Erro: ' + e.message, 'erro'); }
 }
 
 // =============================================
-// DESPESAS
+// RDV — DOCUMENTO
 // =============================================
+const categoriasRDV = ["PASSAGENS","ALIMENTAÇÃO","ALIMENTAÇÃO","PEDÁGIO","HOSPEDAGEM","COMBUSTIVEL","TAXI","ESTACIONAMENTO","OUTROS"];
+
 function gerarLinhasDespesas() {
-    const tbody = document.getElementById('tabela-despesas');
-    categorias.forEach((cat, idx) => {
-        const tr1 = document.createElement('tr'); tr1.classList.add('linha-despesa'); tr1.dataset.idx = idx;
-        tr1.innerHTML = `<td class="td-categoria" rowspan="2">${cat}</td>${[...Array(6)].map(()=>`<td class="td-valor-input"><input type="text" oninput="somar(this)"></td>`).join('')}<td class="td-total-cat" id="total-cat-${idx}">R$&nbsp;&nbsp;&nbsp;-</td>`;
-        tbody.appendChild(tr1);
-        const tr2 = document.createElement('tr'); tr2.classList.add('linha-despesa'); tr2.dataset.idx = idx;
-        tr2.innerHTML = `${[...Array(6)].map(()=>`<td class="td-valor-input"><input type="text" oninput="somar(this)"></td>`).join('')}`;
-        tbody.appendChild(tr2);
+  const tbody = document.getElementById('tabela-despesas');
+  tbody.innerHTML = '';
+  categoriasRDV.forEach((cat, idx) => {
+    const tr1 = document.createElement('tr'); tr1.classList.add('linha-despesa'); tr1.dataset.idx = idx;
+    tr1.innerHTML = `<td class="td-categoria" rowspan="2">${cat}</td>${[...Array(6)].map(()=>`<td class="td-valor-input"><input type="text" oninput="somarRDV(this)"></td>`).join('')}<td class="td-total-cat" id="total-cat-${idx}">R$&nbsp;&nbsp;&nbsp;-</td>`;
+    tbody.appendChild(tr1);
+    const tr2 = document.createElement('tr'); tr2.classList.add('linha-despesa'); tr2.dataset.idx = idx;
+    tr2.innerHTML = [...Array(6)].map(()=>`<td class="td-valor-input"><input type="text" oninput="somarRDV(this)"></td>`).join('');
+    tbody.appendChild(tr2);
+  });
+}
+
+function prepararDoc() {
+  const nome = document.getElementById('input-busca').value;
+  const f = dbFuncs.find(x => x.nome === nome);
+  if (!f) { alert("Selecione um nome válido!"); return; }
+  document.getElementById('print-area').style.display = 'flex';
+  document.getElementById('f-nome').value   = f.nome;
+  document.getElementById('f-setor').value  = f.setor || '';
+  document.getElementById('f-ccusto').value = f.tipoCc || '';
+  document.getElementById('f-banco').value  = f.banco   || '';
+  document.getElementById('f-ag').value     = f.agencia || '';
+  document.getElementById('f-conta').value  = f.conta   || '';
+  document.getElementById('f-cpf').value    = f.cpf     || '';
+  document.getElementById('f-pix').value    = f.pix     || '';
+  document.getElementById('f-tipo').value   = f.tipo    || 'cc';
+  document.getElementById('ass-nome').textContent = f.nome;
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+function somarRDV(el) {
+  const idx = el.closest('.linha-despesa').dataset.idx;
+  let t = 0;
+  document.querySelectorAll(`.linha-despesa[data-idx="${idx}"]`).forEach(tr => {
+    tr.querySelectorAll('input').forEach(i => { const v = parseFloat(i.value.replace(',','.')); if (!isNaN(v)) t += v; });
+  });
+  document.getElementById(`total-cat-${idx}`).textContent = t === 0 ? 'R$\u00a0\u00a0\u00a0-' : 'R$\u00a0' + t.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  atualizarTotalRDV();
+}
+
+function atualizarTotalRDV() {
+  let g = 0;
+  categoriasRDV.forEach((_,idx) => {
+    const txt = (document.getElementById(`total-cat-${idx}`)?.textContent||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim();
+    g += parseFloat(txt) || 0;
+  });
+  document.getElementById('val-geral').textContent = g === 0 ? 'R$\u00a0\u00a0\u00a0\u00a0\u00a0-' : 'R$\u00a0' + g.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  calcularSaldo(g);
+}
+
+function calcularSaldo(totalDespesas) {
+  if (totalDespesas === undefined) {
+    let g = 0;
+    categoriasRDV.forEach((_,idx) => { const txt = (document.getElementById(`total-cat-${idx}`)?.textContent||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim(); g += parseFloat(txt)||0; });
+    totalDespesas = g;
+  }
+  const adiant = parseFloat((document.getElementById('f-adiantamento').value||'').replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
+  document.getElementById('val-saldo').value = (totalDespesas - adiant).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+async function finalizarRDV() {
+  const num = document.getElementById('txt-num-rdv').textContent;
+  const colaborador = document.getElementById('f-nome').value;
+  const setor = document.getElementById('f-setor').value;
+  const motivo = document.getElementById('f-motivo').value;
+  try {
+    const chk = await rdvsRef.where('numero','==',num).get();
+    if (!chk.empty) { alert("⚠️ RDV nº " + num + " já registrado!"); return; }
+  } catch(e) {}
+  const totalDespesas = parseFloat((document.getElementById('val-geral').textContent||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim()) || 0;
+  const adiantamento = parseFloat((document.getElementById('f-adiantamento').value||'').replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
+  const saldo = totalDespesas - adiantamento;
+  const despesasCat = {};
+  categoriasRDV.forEach((cat,idx) => { const txt = (document.getElementById('total-cat-'+idx)?.textContent||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim(); const val = parseFloat(txt)||0; if (val>0) despesasCat[cat] = (despesasCat[cat]||0)+val; });
+  try {
+    await rdvsRef.add({ numero:num, colaborador, setor, motivo, totalDespesas, adiantamento, saldo, destino: document.getElementById('f-destino').value||'', despesasCat, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+    const prox = String(parseInt(num)+1).padStart(3,'0');
+    await configRef.update({ ultimoRDV: prox, totalGerados: firebase.firestore.FieldValue.increment(1) });
+    toast(`✅ RDV #${num} salvo!`, 'sucesso');
+  } catch(e) { toast('⚠️ Erro ao salvar: ' + e.message, 'erro'); }
+  document.title = "RDV_" + num + "_" + colaborador.replace(/\s+/g,'_');
+  window.print();
+  setTimeout(() => location.reload(), 1200);
+}
+
+// =============================================
+// BAIXADAS — FIREBASE
+// =============================================
+async function carregarBaixadas() {
+  try {
+    const snap = await folgasRef.orderBy('timestamp','desc').get();
+    historicoBaixadas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBaixadas(historicoBaixadas);
+    const cnt = historicoBaixadas.length;
+    document.getElementById('card-baixadas-count').textContent = cnt;
+    document.getElementById('nav-badge-baixadas').textContent = cnt;
+  } catch(e) {
+    document.getElementById('hist-baixadas').innerHTML = '<tr><td colspan="5" class="vazio">Erro ao carregar.</td></tr>';
+  }
+}
+
+function renderBaixadas(lista) {
+  const tbody = document.getElementById('hist-baixadas');
+  if (!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="5" class="vazio">Nenhum registro encontrado.</td></tr>'; document.getElementById('gasto-total-card').textContent = 'R$ 0,00'; return; }
+  let soma = 0;
+  tbody.innerHTML = lista.map(item => {
+    soma += parseFloat(item.total || 0);
+    const regra = item.regra || '—';
+    let badgeRegra = `<span style="font-size:11px;">${regra}</span>`;
+    if (regra.toLowerCase().includes('demiss')) badgeRegra = `<span class="badge badge-demissao">DEMISSÃO</span>`;
+    else if (regra.toLowerCase().includes('rescis')) badgeRegra = `<span class="badge badge-rescisao">RESCISÃO</span>`;
+    return `<tr>
+      <td style="font-size:11px;color:var(--cinza-txt)">${item.data}</td>
+      <td style="font-weight:700">${item.nome}</td>
+      <td>${badgeRegra}</td>
+      <td style="font-weight:700;color:var(--verde)">${fmtBRL(parseFloat(item.total||0))}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="excluirBaixada('${item.id}')">🗑️</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('gasto-total-card').textContent = soma.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+
+function filtrarBaixadas() {
+  const busca = document.getElementById('busca-baixadas').value.toLowerCase();
+  renderBaixadas(historicoBaixadas.filter(h => h.nome.toLowerCase().includes(busca)));
+}
+
+async function excluirBaixada(id) {
+  if (!confirm('Excluir este registro?')) return;
+  try {
+    await folgasRef.doc(id).delete();
+    historicoBaixadas = historicoBaixadas.filter(h => h.id !== id);
+    renderBaixadas(historicoBaixadas);
+    const cnt = historicoBaixadas.length;
+    document.getElementById('card-baixadas-count').textContent = cnt;
+    document.getElementById('nav-badge-baixadas').textContent = cnt;
+    toast('🗑️ Registro removido.', 'sucesso');
+  } catch(e) { toast('Erro: ' + e.message, 'erro'); }
+}
+
+async function limparBaixadas() {
+  if (!confirm('⚠️ Apagar TODO o histórico de folgas?')) return;
+  try {
+    const snap = await folgasRef.get();
+    const batch = dbBaixadas.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    historicoBaixadas = [];
+    renderBaixadas([]);
+    document.getElementById('card-baixadas-count').textContent = '0';
+    document.getElementById('nav-badge-baixadas').textContent = '0';
+    toast('✅ Histórico limpo!', 'sucesso');
+  } catch(e) { toast('Erro: ' + e.message, 'erro'); }
+}
+
+// =============================================
+// BAIXADAS — FORMULÁRIO
+// =============================================
+function onRegraChange() {
+  const val = document.getElementById('b-periodo').value;
+  const campoSal = document.getElementById('campo-salario-wrap');
+  const badge = document.getElementById('badge-regra-info');
+  if (val === 'demissao') {
+    campoSal.style.display = 'none';
+    badge.style.display = 'block';
+    badge.style.background = '#fff3cd'; badge.style.color = '#856404'; badge.style.border = '1.5px solid #ffc107';
+    badge.textContent = '⚠️ PEDIDO DE DEMISSÃO — Sem indenização de folgas. Apenas passagens/despesas.';
+  } else if (val === 'rescisao') {
+    campoSal.style.display = 'none';
+    badge.style.display = 'block';
+    badge.style.background = '#fee2e2'; badge.style.color = '#dc2626'; badge.style.border = '1.5px solid #dc2626';
+    badge.textContent = '🔴 RESCISÃO DE CONTRATO — Sem indenização de folgas. Apenas passagens/despesas.';
+  } else {
+    campoSal.style.display = 'block';
+    badge.style.display = 'none';
+  }
+}
+
+function adicionarPassagem() {
+  contadorPassagens++;
+  const id = contadorPassagens;
+  const div = document.createElement('div');
+  div.id = `passagem-row-${id}`;
+  div.className = 'passagem-row';
+  div.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="desc-pass-${id}" class="form-input" placeholder="Ex: Trecho ${id}" style="flex:2">
+      <input type="number" id="val-pass-${id}" class="form-input" placeholder="R$" style="flex:1">
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <input type="file" accept="image/*" onchange="lerImagem(this,${id})" style="font-size:11px;color:var(--cinza-txt);">
+      <button class="btn btn-danger btn-sm" onclick="removerPassagem(${id})">Remover</button>
+    </div>`;
+  document.getElementById('lista-passagens').appendChild(div);
+}
+
+function lerImagem(input, id) {
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    reader.onload = e => { imagensPassagens[id] = e.target.result; };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function removerPassagem(id) {
+  const row = document.getElementById(`passagem-row-${id}`);
+  if (row) row.remove();
+  delete imagensPassagens[id];
+}
+
+async function gerarBaixada() {
+  const nome = document.getElementById('b-nome').value.trim();
+  const periodoVal = document.getElementById('b-periodo').value;
+  const selectObj = document.getElementById('b-periodo');
+  const regraTexto = selectObj.options[selectObj.selectedIndex].text;
+  const especial = periodoVal === 'demissao' || periodoVal === 'rescisao';
+  if (!nome) { toast('⚠️ Informe o nome!', 'erro'); return; }
+  if (periodoVal === '0') { toast('⚠️ Selecione a regra!', 'erro'); return; }
+  let sal = 0, dias = 0, indeniza = 0;
+  if (!especial) {
+    sal  = parseFloat(document.getElementById('b-salario').value);
+    dias = parseInt(periodoVal);
+    if (!sal) { toast('⚠️ Informe o salário!', 'erro'); return; }
+    indeniza = (sal / 220 * 8) * dias;
+  }
+  const btn = document.getElementById('btn-gerar-baixada');
+  btn.innerHTML = '<span class="spinner"></span> Salvando...'; btn.disabled = true;
+  let totalPassagens = 0;
+  let htmlPassRef = '', htmlPrints = '';
+  const passagensData = [];
+  document.querySelectorAll('[id^="passagem-row-"]').forEach(row => {
+    const id = row.id.split('-').pop();
+    const desc = document.getElementById(`desc-pass-${id}`)?.value || `Trecho ${id}`;
+    const valor = parseFloat(document.getElementById(`val-pass-${id}`)?.value) || 0;
+    totalPassagens += valor;
+    passagensData.push({ desc, valor });
+    htmlPassRef += `<tr><td style="padding:10px;border:1px solid #ddd">${desc}</td><td style="padding:10px;border:1px solid #ddd;text-align:right">R$ ${valor.toFixed(2)}</td></tr>`;
+    if (imagensPassagens[id]) htmlPrints += `<img src="${imagensPassagens[id]}" style="max-width:48%;border:1px solid #ccc;border-radius:5px;margin-bottom:5px">`;
+  });
+  const totalGeral = indeniza + totalPassagens;
+  const data = new Date().toLocaleDateString('pt-BR');
+  // Montar relatório
+  document.getElementById('rel-nome').textContent = nome;
+  document.getElementById('rel-data').textContent = data;
+  document.getElementById('rel-regra-txt').textContent = regraTexto;
+  document.getElementById('rel-total').textContent = totalGeral.toFixed(2);
+  document.getElementById('rel-prints').innerHTML = htmlPrints;
+  if (especial) {
+    const isDem = periodoVal === 'demissao';
+    document.getElementById('rel-titulo').textContent = isDem ? 'DEMONSTRATIVO — PEDIDO DE DEMISSÃO' : 'DEMONSTRATIVO — RESCISÃO DE CONTRATO';
+    document.getElementById('rel-bloco-politica').style.display = 'none';
+    document.getElementById('rel-bloco-especial').style.display = 'block';
+    document.getElementById('rel-especial-titulo').textContent = isDem ? '⚠️ PEDIDO DE DEMISSÃO' : '🔴 RESCISÃO DE CONTRATO';
+    document.getElementById('rel-especial-desc').textContent = isDem
+      ? 'O colaborador solicitou rescisão voluntária. Não há indenização de folgas. Apenas passagens e despesas de retorno.'
+      : 'O contrato foi rescindido pela empresa. Não há indenização de folgas. Apenas passagens e despesas de retorno.';
+    document.getElementById('rel-itens').innerHTML = passagensData.length > 0 ? htmlPassRef : `<tr><td style="padding:10px;border:1px solid #ddd;color:#aaa;font-style:italic" colspan="2">Nenhuma passagem lançada</td></tr>`;
+  } else {
+    document.getElementById('rel-titulo').textContent = 'DEMONSTRATIVO DE COMPRA DE FOLGAS';
+    document.getElementById('rel-bloco-politica').style.display = 'block';
+    document.getElementById('rel-bloco-especial').style.display = 'none';
+    document.getElementById('rel-itens').innerHTML = `<tr><td style="padding:10px;border:1px solid #ddd">Indenização de ${dias} dias de folga remunerada (Base R$ ${sal.toFixed(2)})</td><td style="padding:10px;border:1px solid #ddd;text-align:right">R$ ${indeniza.toFixed(2)}</td></tr>` + htmlPassRef;
+  }
+  try {
+    const registro = { data, nome, regra: regraTexto, ...(especial ? {} : { salario: sal, dias, indeniza: indeniza.toFixed(2) }), passagens: passagensData, totalPassagens: totalPassagens.toFixed(2), total: totalGeral.toFixed(2), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+    const docRef = await folgasRef.add(registro);
+    historicoBaixadas.unshift({ id: docRef.id, ...registro });
+    renderBaixadas(historicoBaixadas);
+    const cnt = historicoBaixadas.length;
+    document.getElementById('card-baixadas-count').textContent = cnt;
+    document.getElementById('nav-badge-baixadas').textContent = cnt;
+    document.getElementById('rel-baixadas').style.display = 'block';
+    toast('✅ Salvo no Firebase!', 'sucesso');
+    window.scrollTo(0, document.body.scrollHeight);
+    setTimeout(() => window.print(), 500);
+  } catch(e) { toast('Erro ao salvar: ' + e.message, 'erro'); }
+  btn.innerHTML = '📄 GERAR RELATÓRIO E SALVAR'; btn.disabled = false;
+}
+
+// =============================================
+// HISTÓRICO GERAL
+// =============================================
+async function carregarHistoricoGeral() {
+  try {
+    const [rdvsSnap, folgasSnap] = await Promise.all([
+      rdvsRef.orderBy('criadoEm','desc').limit(100).get(),
+      folgasRef.orderBy('timestamp','desc').limit(100).get()
+    ]);
+    const rows = [];
+    let somaRDV = 0, somaFolg = 0;
+    rdvsSnap.forEach(d => {
+      const data = d.data();
+      somaRDV += data.totalDespesas || 0;
+      rows.push({ tipo:'RDV', data: data.criadoEm ? new Date(data.criadoEm.toDate()).toLocaleDateString('pt-BR') : '—', nome: data.colaborador||'—', desc: `RDV #${data.numero} — ${data.destino||'—'}`, valor: data.totalDespesas||0 });
     });
+    folgasSnap.forEach(d => {
+      const data = d.data();
+      somaFolg += parseFloat(data.total||0);
+      rows.push({ tipo:'FOLGA', data: data.data||'—', nome: data.nome||'—', desc: data.regra||'—', valor: parseFloat(data.total||0) });
+    });
+    rows.sort((a,b) => b.data.split('/').reverse().join('') - a.data.split('/').reverse().join(''));
+    document.getElementById('hg-rdvs').textContent = rdvsSnap.size;
+    document.getElementById('hg-baixadas').textContent = folgasSnap.size;
+    document.getElementById('hg-desp').textContent = fmtBRL(somaRDV);
+    document.getElementById('hg-folg').textContent = fmtBRL(somaFolg);
+    const tbody = document.getElementById('hist-geral');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="vazio">Nenhum registro.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><span class="badge ${r.tipo==='RDV'?'badge-ok':'badge-adm'}">${r.tipo}</span></td>
+        <td style="font-size:11px;color:var(--cinza-txt)">${r.data}</td>
+        <td style="font-weight:700">${r.nome}</td>
+        <td style="font-size:12px;color:#475569">${r.desc}</td>
+        <td style="font-weight:700;color:var(--verde)">${fmtBRL(r.valor)}</td>
+      </tr>`).join('');
+  } catch(e) {
+    document.getElementById('hist-geral').innerHTML = '<tr><td colspan="5" class="vazio">Erro ao carregar dados.</td></tr>';
+  }
 }
 
 // =============================================
 // INIT
 // =============================================
 async function init() {
-    gerarLinhasDespesas();
-    const hoje = new Date().toLocaleDateString('pt-BR');
-    document.getElementById('data-doc').value    = hoje;
-    document.getElementById('data-topo').innerText = hoje;
-    document.getElementById('f-data-ass').value  = hoje;
-    await carregarEstadoFirebase();
-    await carregarFuncionarios();
+  gerarLinhasDespesas();
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('data-topo').textContent = hoje;
+  document.getElementById('data-doc').value  = hoje;
+  document.getElementById('f-data-ass').value = hoje;
+  await carregarEstadoRDV();
+  await carregarFuncionarios();
+  await carregarBaixadas();
 }
 
-// =============================================
-// AJUSTE MANUAL
-// =============================================
-async function ajustarNumeroManual() {
-    let novo = prompt("Digite o novo número sequencial do RDV (ex: 066):");
-    if (!novo) return;
-    const formatado = novo.padStart(3, '0');
-    try {
-        await configRef.update({ ultimoRDV: formatado });
-        mostrarToast(`Nº RDV atualizado para ${formatado}`, 'sucesso');
-        setTimeout(() => location.reload(), 1500);
-    } catch (e) {
-        localStorage.setItem('ultimoRDV', formatado);
-        mostrarToast('Salvo localmente', 'erro');
-        location.reload();
-    }
-}
-
-// =============================================
-// PREPARAR DOCUMENTO
-// =============================================
-function prepararDoc() {
-    const nome = document.getElementById('input-busca').value;
-    const f = dbFuncs.find(x => x.nome === nome);
-    if (!f) { alert("Selecione um nome válido na lista!"); return; }
-    document.getElementById('doc-container').style.display = 'flex';
-    document.getElementById('f-nome').value   = f.nome;
-    document.getElementById('f-setor').value  = f.setor || '';
-    document.getElementById('f-ccusto').value = f.tipoCc || '';
-    document.getElementById('f-banco').value  = f.banco   || '';
-    document.getElementById('f-ag').value     = f.agencia || '';
-    document.getElementById('f-conta').value  = f.conta   || '';
-    document.getElementById('f-cpf').value    = f.cpf     || '';
-    document.getElementById('f-pix').value    = f.pix     || '';
-    document.getElementById('f-tipo').value   = f.tipo    || 'cc';
-    document.getElementById('ass-nome').innerText = f.nome;
-    window.scrollTo(0, document.body.scrollHeight);
-}
-
-// =============================================
-// CÁLCULOS
-// =============================================
-function somar(el) {
-    const idx = el.closest('.linha-despesa').dataset.idx;
-    let t = 0;
-    document.querySelectorAll(`.linha-despesa[data-idx="${idx}"]`).forEach(tr => {
-        tr.querySelectorAll('input').forEach(i => { const v = parseFloat(i.value.replace(',','.')); if (!isNaN(v)) t += v; });
-    });
-    document.getElementById(`total-cat-${idx}`).innerText = t === 0 ? 'R$\u00a0\u00a0\u00a0-' : 'R$\u00a0' + t.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    atualizarTotal();
-}
-
-function atualizarTotal() {
-    let g = 0;
-    categorias.forEach((_,idx) => {
-        const txt = document.getElementById(`total-cat-${idx}`).innerText.replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim();
-        g += parseFloat(txt) || 0;
-    });
-    document.getElementById('val-geral').innerText = g === 0 ? 'R$\u00a0\u00a0\u00a0\u00a0\u00a0-' : 'R$\u00a0' + g.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-    calcularSaldo(g);
-}
-
-function calcularSaldo(totalDespesas) {
-    if (totalDespesas === undefined) {
-        let g = 0;
-        categorias.forEach((_,idx) => { const txt = (document.getElementById(`total-cat-${idx}`)?.innerText||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim(); g += parseFloat(txt)||0; });
-        totalDespesas = g;
-    }
-    const adiant = parseFloat((document.getElementById('f-adiantamento').value||'').replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
-    document.getElementById('val-saldo').value = (totalDespesas - adiant).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-}
-
-// =============================================
-// FINALIZAR E IMPRIMIR
-// =============================================
-async function finalizar() {
-    const num = document.getElementById('txt-num-rdv').innerText;
-    const colaborador = document.getElementById('f-nome').value;
-    const setor = document.getElementById('f-setor').value;
-    const motivo = document.getElementById('f-motivo').value;
-    if (await rdvJaUsado(num)) { alert("⚠️ RDV nº " + num + " já foi registrado!"); return; }
-    const totalDespesas = parseFloat((document.getElementById('val-geral').innerText||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim()) || 0;
-    const adiantamento = parseFloat((document.getElementById('f-adiantamento').value||'').replace('R$','').replace(/\./g,'').replace(',','.').trim()) || 0;
-    const saldo = totalDespesas - adiantamento;
-    const despesasCat = {};
-    categorias.forEach((cat,idx) => { const txt = (document.getElementById('total-cat-'+idx)?.innerText||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim(); const val = parseFloat(txt)||0; if (val>0) despesasCat[cat] = (despesasCat[cat]||0)+val; });
-    await salvarRDVFirebase(num, colaborador, setor, motivo, totalDespesas, adiantamento, saldo, despesasCat);
-    let usados = JSON.parse(localStorage.getItem('rdvsUsados')||"[]");
-    if (!usados.includes(num)) { usados.push(num); localStorage.setItem('rdvsUsados', JSON.stringify(usados)); }
-    localStorage.setItem('ultimoRDV', String(parseInt(num)+1).padStart(3,'0'));
-    document.title = "RDV_" + num + "_" + colaborador.replace(/\s+/g,'_');
-    window.print();
-    setTimeout(() => location.reload(), 1000);
-}
-
-// =============================================
-// APAGAR
-// =============================================
-async function apagarRDV(docId, numero, colaborador) {
-    if (!confirm(`Apagar o RDV #${numero} de ${colaborador}?`)) return;
-    try {
-        await rdvsRef.doc(docId).delete();
-        document.getElementById('item-'+docId)?.remove();
-        const atual = parseInt(document.getElementById('card-count').innerText)||0;
-        document.getElementById('card-count').innerText = Math.max(0,atual-1);
-        if (document.getElementById('historico-lista').children.length===0)
-            document.getElementById('historico-lista').innerHTML = '<div class="historico-vazio">Nenhum RDV gerado ainda.</div>';
-        mostrarToast(`🗑️ RDV #${numero} apagado!`, 'sucesso');
-    } catch (e) { mostrarToast('⚠️ Erro ao apagar: '+e.message,'erro'); }
-}
-
-async function apagarHistorico() {
-    if (!confirm("⚠️ Apagar TODO o histórico de RDVs?\nEsta ação não pode ser desfeita!")) return;
-    if (!confirm("🔴 CONFIRMAÇÃO FINAL: Apagar todos os registros?")) return;
-    mostrarToast('🗑️ Apagando histórico...','');
-    try {
-        const snap = await rdvsRef.get();
-        const batch = db_fire.batch();
-        snap.forEach(doc => batch.delete(doc.ref));
-        await batch.commit();
-        await configRef.update({ totalGerados: 0 });
-        localStorage.removeItem('rdvsUsados');
-        mostrarToast('✅ Histórico apagado!','sucesso');
-        document.getElementById('historico-lista').innerHTML = '<div class="historico-vazio">Nenhum RDV gerado ainda.</div>';
-        document.getElementById('card-count').innerText = '0';
-    } catch (e) { mostrarToast('⚠️ Erro ao apagar: '+e.message,'erro'); }
-}
+window.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
