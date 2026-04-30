@@ -445,7 +445,7 @@ table.tbl tr:hover td { background: #f8fafd; }
 }
 
 /* ===== IMPRESSÃO ===== */
-@page { size: A4; margin: 4mm 6mm; }
+@page { size: A4; margin: 30mm 20mm 20mm 30mm; }
 @media print {
   body > *:not(#print-area):not(#rel-baixadas) { display: none !important; }
   .app { display: none !important; }
@@ -458,15 +458,22 @@ table.tbl tr:hover td { background: #f8fafd; }
   body.print-baixada #rel-baixadas { display: block !important; }
   body.print-baixada #print-area { display: none !important; }
   .folha-a4 { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
-  .rdv-table td, .rdv-table th { padding: 2px 4px !important; }
-  .td-valor-input input { height: 15px !important; }
+  .rdv-table { font-size: 12px !important; }
+  .rdv-table td, .rdv-table th { padding: 4px 6px !important; font-size: 12px !important; }
+  .rdv-table input, .rdv-table select { font-size: 12px !important; }
+  .td-valor-input input { height: 20px !important; font-size: 12px !important; }
+  .td-categoria { font-size: 12px !important; }
+  .td-total-cat { font-size: 12px !important; }
+  .td-soma-label, .td-soma-valor { font-size: 12px !important; }
+  .td-saldo-label, .td-saldo-valor, .td-saldo-desc { font-size: 12px !important; }
+  .lbl-rdv { font-size: 10px !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 #print-area { display: none; padding: 0; }
 .folha-a4 { width: 100%; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,.15); box-sizing: border-box; }
-.rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
-.rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
-.rdv-table input, .rdv-table select { border: none; background: transparent; font-family: Arial, sans-serif; font-size: 9px; outline: none; width: 100%; padding: 0; }
+.rdv-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: Arial, sans-serif; border: 2px solid #333; }
+.rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 4px 6px; vertical-align: middle; }
+.rdv-table input, .rdv-table select { border: none; background: transparent; font-family: Arial, sans-serif; font-size: 12px; outline: none; width: 100%; padding: 0; }
 .bg-amarelo { background-color: #FFFF99; }
 .bg-cinza { background-color: #D9D9D9; }
 .lbl-rdv { font-size: 7.5px; font-weight: bold; color: #333; display: block; margin-bottom: 1px; }
