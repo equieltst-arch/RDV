@@ -395,17 +395,19 @@ table.tbl tr:hover td { background: #f8fafd; }
 }
 
 /* ===== IMPRESSÃO ===== */
-@page { size: A4; margin: 0; }
+@page { size: A4; margin: 8mm 10mm; }
 @media print {
   body > *:not(#print-area):not(#rel-baixadas) { display: none !important; }
   .app { display: none !important; }
+  #tela-login { display: none !important; }
   #print-area { display: none; }
   #rel-baixadas { display: none; }
-  body.print-rdv #print-area { display: flex !important; }
+  body.print-rdv #print-area { display: block !important; }
   body.print-rdv #rel-baixadas { display: none !important; }
+  body.print-rdv .btn-imprimir { display: none !important; }
   body.print-baixada #rel-baixadas { display: block !important; }
   body.print-baixada #print-area { display: none !important; }
-  .folha-a4 { box-shadow: none !important; }
+  .folha-a4 { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 #print-area { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
