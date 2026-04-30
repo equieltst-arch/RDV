@@ -899,6 +899,10 @@ table.tbl tr:hover td { background: #f8fafd; }
       <div class="c-label">Gasto Folgas (total)</div>
       <div class="c-val" id="hg-folg" style="font-size:16px;">—</div>
     </div>
+    <div class="card-resumo verde" style="border-top-color:#dc2626;">
+      <div class="c-label">Total TRCTs</div>
+      <div class="c-val" id="hg-trct" style="font-size:16px;">—</div>
+    </div>
   </div>
   <div class="painel">
     <div class="painel-header"><div class="painel-titulo">Todos os Registros</div></div>
@@ -988,11 +992,11 @@ table.tbl tr:hover td { background: #f8fafd; }
         </div>
         <div class="form-group">
           <label class="form-label">Data da Dispensa</label>
-          <input type="date" id="r-data-dispensa" class="form-input">
+          <input type="date" id="r-data-dispensa" class="form-input" oninput="calcDataPagamento()">
         </div>
         <div class="form-group">
           <label class="form-label">Data do Pagamento da Rescisão</label>
-          <input type="date" id="r-data-pagamento" class="form-input">
+          <input type="date" id="r-data-pagamento" class="form-input" style="background:#f0fdf4;border-color:var(--verde);">
         </div>
       </div>
 
@@ -1100,6 +1104,15 @@ table.tbl tr:hover td { background: #f8fafd; }
         </div>
       </div>
 
+      <div class="secao-form">Valor do TRCT</div>
+      <div class="form-grid">
+        <div class="form-group form-grid-full">
+          <label class="form-label">Valor Total do TRCT (R$) — gerado pelo DP</label>
+          <input type="number" id="r-trct" class="form-input" placeholder="0,00" value="0"
+            style="font-size:18px;font-weight:800;color:var(--verde);border-color:var(--verde);">
+        </div>
+      </div>
+
       <div id="r-aviso-tipo" style="display:none;padding:12px 16px;border-radius:8px;font-size:12px;font-weight:700;margin-top:14px;"></div>
 
       <div style="margin-top:20px;">
@@ -1122,7 +1135,7 @@ table.tbl tr:hover td { background: #f8fafd; }
     <div class="table-wrap">
       <table class="tbl">
         <thead>
-          <tr><th>Data Dispensa</th><th>Colaborador</th><th>Tipo</th><th>Pagamento</th><th>Débitos Quitação</th><th>Registrado por</th><th>Ação</th></tr>
+          <tr><th>Data Dispensa</th><th>Colaborador</th><th>Tipo</th><th>TRCT</th><th>Pagamento</th><th>Débitos Quitação</th><th>Registrado por</th><th>Ação</th></tr>
         </thead>
         <tbody id="hist-rescisao">
           <tr><td colspan="7" class="vazio">Carregando...</td></tr>
@@ -2425,7 +2438,7 @@ async function carregarHistoricoGeral() {
       rescisRef.orderBy('criadoEm','desc').limit(100).get()
     ]);
     const rows = [];
-    let somaRDV = 0, somaFolg = 0;
+    let somaRDV = 0, somaFolg = 0, somaTRCT = 0;
     rdvsSnap.forEach(d => {
       const data = d.data();
       somaRDV += data.totalDespesas || 0;
@@ -2438,13 +2451,15 @@ async function carregarHistoricoGeral() {
     });
     rescisSnap.forEach(d => {
       const data = d.data();
-      rows.push({ tipo:'RESCISÃO', data: data.dataDispensa||'—', nome: data.nome||'—', desc: data.tipo||'—', valor: data.quitacao?.total||0 });
+      somaTRCT += parseFloat(data.trct||0);
+      rows.push({ tipo:'RESCISÃO', data: data.dataDispensa||'—', nome: data.nome||'—', desc: data.tipo||'—', valor: parseFloat(data.trct||0) });
     });
     rows.sort((a,b) => b.data.split('/').reverse().join('') - a.data.split('/').reverse().join(''));
     document.getElementById('hg-rdvs').textContent = rdvsSnap.size;
     document.getElementById('hg-baixadas').textContent = folgasSnap.size;
     document.getElementById('hg-desp').textContent = fmtBRL(somaRDV);
     document.getElementById('hg-folg').textContent = fmtBRL(somaFolg);
+    document.getElementById('hg-trct').textContent = fmtBRL(somaTRCT);
     const tbody = document.getElementById('hist-geral');
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="vazio">Nenhum registro.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `
@@ -2463,6 +2478,14 @@ async function carregarHistoricoGeral() {
 // =============================================
 // RESCISÃO — FUNÇÕES
 // =============================================
+function calcDataPagamento() {
+  const disp = document.getElementById('r-data-dispensa').value;
+  if (!disp) return;
+  const d = new Date(disp + 'T12:00:00');
+  d.setDate(d.getDate() + 10);
+  document.getElementById('r-data-pagamento').value = d.toISOString().split('T')[0];
+}
+
 function onTipoRescisaoChange() {
   const tipo = document.getElementById('r-tipo').value;
   const aviso = document.getElementById('r-aviso-tipo');
@@ -2509,7 +2532,7 @@ function limparFormRescisao() {
    'r-q-outros-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   ['r-he50d','r-he60d','r-he100d','r-hn','r-he50n','r-he100n','r-ajuda',
    'r-refeicoes','r-passagem','r-faltas-h','r-faltas-d','r-atestado',
-   'r-q-ferramentas','r-q-seguranca','r-q-financeiro','r-q-rh','r-q-outros-val']
+   'r-q-ferramentas','r-q-seguranca','r-q-financeiro','r-q-rh','r-q-outros-val','r-trct']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = '0'; });
   document.getElementById('r-tipo').value = '';
   document.getElementById('r-empresa-demite').value = 'S';
@@ -2572,6 +2595,7 @@ async function salvarRescisao() {
       outrosVal:   getNumRescisao('r-q-outros-val'),
       total:       totalQuitacao,
     },
+    trct:          getNumRescisao('r-trct'),
     criadoPor:     usuarioAtual?.email || '—',
     criadoPorNome: getNomeUsuario(usuarioAtual?.email || ''),
     criadoEm:      firebase.firestore.FieldValue.serverTimestamp(),
@@ -2616,6 +2640,7 @@ function renderRescisoes(lista) {
       <td style="font-size:11px;color:var(--cinza-txt)">${r.dataDispensa || '—'}</td>
       <td style="font-weight:700">${r.nome}</td>
       <td style="font-size:11px;">${tipoLabel}</td>
+      <td>${r.trct > 0 ? `<span style="font-weight:800;color:var(--verde)">${fmtBRL(r.trct)}</span>` : '<span style="font-size:11px;color:var(--cinza-txt)">—</span>'}</td>
       <td style="font-size:11px;color:var(--cinza-txt)">${r.dataPagamento || '—'}</td>
       <td>${totalQ > 0 ? `<span class="badge badge-rev">${fmtBRL(totalQ)}</span>` : '<span style="font-size:11px;color:var(--cinza-txt)">sem débitos</span>'}</td>
       <td style="font-size:11px;color:var(--cinza-txt)">${r.criadoPorNome || r.criadoPor || '—'}</td>
@@ -2661,6 +2686,7 @@ function verRescisao(id) {
     <div class="modal-linha"><span class="ml">📋 Tipo</span><span class="mv" style="font-size:12px;">${r.tipo||'—'}</span></div>
     <div class="modal-linha"><span class="ml">📅 Data Dispensa</span><span class="mv">${r.dataDispensa||'—'}</span></div>
     <div class="modal-linha"><span class="ml">💳 Data Pagamento</span><span class="mv">${r.dataPagamento||'—'}</span></div>
+    <div class="modal-linha" style="background:#f0fdf4;padding:8px;border-radius:6px;margin-top:4px;"><span class="ml" style="font-weight:800;font-size:14px;">💰 VALOR TRCT</span><span class="mv mv-verde" style="font-size:18px;">${r.trct > 0 ? fmtBRL(r.trct) : '—'}</span></div>
     <div class="modal-linha"><span class="ml">🏦 Banco</span><span class="mv">${r.banco||'—'} · ${r.agencia||'—'}</span></div>
     <div class="modal-linha"><span class="ml">🔑 PIX</span><span class="mv">${r.pix||'—'}</span></div>
     ${lancHtml ? `<div class="modal-linha" style="background:#f0f4ff;padding:6px 8px;border-radius:6px;font-weight:800;color:var(--azul);font-size:12px;margin-top:8px;">📊 LANÇAMENTOS</div>${lancHtml}` : ''}
