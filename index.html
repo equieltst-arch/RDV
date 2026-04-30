@@ -625,6 +625,10 @@ table.tbl tr:hover td { background: #f8fafd; }
       <span class="ico">📋</span> RDV
       <span class="badge-nav" id="nav-badge-rdv">—</span>
     </div>
+    <div class="nav-item" onclick="irPara('aba-rescisao', this)">
+      <span class="ico">📝</span> Rescisão
+      <span class="badge-nav" id="nav-badge-rescisao">—</span>
+    </div>
     <div class="nav-item" onclick="irPara('aba-baixadas', this)">
       <span class="ico">🏖️</span> Compra de Folgas
       <span class="badge-nav" id="nav-badge-baixadas">—</span>
@@ -879,6 +883,227 @@ table.tbl tr:hover td { background: #f8fafd; }
       <table class="tbl">
         <thead><tr><th>Tipo</th><th>Data</th><th>Colaborador</th><th>Descrição</th><th>Valor</th></tr></thead>
         <tbody id="hist-geral"><tr><td colspan="5" class="vazio">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ABA RESCISÃO ==================== -->
+<div class="aba" id="aba-rescisao">
+  <div class="cards-grid">
+    <div class="card-resumo azul">
+      <div class="c-label">Rescisões Registradas</div>
+      <div class="c-val" id="card-rescisao-count">0</div>
+      <div class="c-sub">Total no Firebase</div>
+    </div>
+    <div class="card-resumo vermelho" style="--card-color:#dc2626;">
+      <div class="c-label">Último Tipo</div>
+      <div class="c-val" id="card-rescisao-tipo" style="font-size:14px;">—</div>
+      <div class="c-sub">Mais recente</div>
+    </div>
+  </div>
+
+  <!-- Formulário SOL. RESCISÃO -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">📄 Solicitação de Rescisão — TRCT</div>
+      <button class="btn btn-danger btn-sm" onclick="limparFormRescisao()">🗑️ Limpar</button>
+    </div>
+    <div class="painel-body">
+
+      <div class="secao-form">Dados do Colaborador</div>
+      <div class="form-grid">
+        <div class="form-group form-grid-full">
+          <label class="form-label">Nome do Colaborador</label>
+          <input type="text" id="r-nome" class="form-input" list="lista-func-rescisao" placeholder="Digite para buscar...">
+          <datalist id="lista-func-rescisao"></datalist>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input type="text" id="r-cpf" class="form-input" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Função</label>
+          <input type="text" id="r-funcao" class="form-input" placeholder="Ex: MOTORISTA">
+        </div>
+      </div>
+
+      <div class="secao-form">Tipo de Rescisão</div>
+      <div class="form-grid">
+        <div class="form-group form-grid-full">
+          <label class="form-label">Tipo de Rescisão</label>
+          <select id="r-tipo" class="form-select" onchange="onTipoRescisaoChange()">
+            <option value="">Selecione...</option>
+            <option value="Rescisão por iniciativa da empresa (sem justa causa)">Rescisão por iniciativa da empresa (sem justa causa)</option>
+            <option value="Pedido de demissão">Pedido de demissão</option>
+            <option value="Rescisão por justa causa">Rescisão por justa causa</option>
+            <option value="Rescisão por acordo mútuo">Rescisão por acordo mútuo</option>
+            <option value="Término de contrato de experiência">Término de contrato de experiência</option>
+            <option value="Término antecipado de contrato de experiência">Término antecipado de contrato de experiência</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Empresa está demitindo?</label>
+          <select id="r-empresa-demite" class="form-select">
+            <option value="S">Sim</option>
+            <option value="N">Não</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contrato de experiência?</label>
+          <select id="r-experiencia" class="form-select">
+            <option value="N">Não</option>
+            <option value="S">Sim</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Término antecipado?</label>
+          <select id="r-antecipado" class="form-select">
+            <option value="N">Não</option>
+            <option value="S">Sim (indeniz. 50% dias restantes)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data da Dispensa</label>
+          <input type="date" id="r-data-dispensa" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data do Pagamento da Rescisão</label>
+          <input type="date" id="r-data-pagamento" class="form-input">
+        </div>
+      </div>
+
+      <div class="secao-form">Lançamentos</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">035 — HE 50% Diurnas (h)</label>
+          <input type="number" id="r-he50d" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">036 — HE 60% Diurnas (h)</label>
+          <input type="number" id="r-he60d" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">049 — HE 100% Diurnas (h)</label>
+          <input type="number" id="r-he100d" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">002 — Total Horas Noturnas (h)</label>
+          <input type="number" id="r-hn" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">036 — HE 50% Noturnas (h)</label>
+          <input type="number" id="r-he50n" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">050 — HE 100% Noturnas (h)</label>
+          <input type="number" id="r-he100n" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">135 — Ajuda de Custo (R$)</label>
+          <input type="number" id="r-ajuda" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">1091 — Desc. Refeições (R$)</label>
+          <input type="number" id="r-refeicoes" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">804 — Reembolso Passagem/RDV (R$)</label>
+          <input type="number" id="r-passagem" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">023 — Horas Faltas (h)</label>
+          <input type="number" id="r-faltas-h" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dias de Faltas</label>
+          <input type="number" id="r-faltas-d" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dias de Atestado</label>
+          <input type="number" id="r-atestado" class="form-input" placeholder="0" value="0">
+        </div>
+      </div>
+
+      <div class="secao-form">Dados Bancários</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Banco</label>
+          <input type="text" id="r-banco" class="form-input" placeholder="Ex: NUBANK">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Agência</label>
+          <input type="text" id="r-agencia" class="form-input" placeholder="0000-0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conta Corrente Nº</label>
+          <input type="text" id="r-cc" class="form-input" placeholder="00000-0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Conta Poupança Nº</label>
+          <input type="text" id="r-cp" class="form-input" placeholder="00000-0">
+        </div>
+        <div class="form-group form-grid-full">
+          <label class="form-label">Chave PIX</label>
+          <input type="text" id="r-pix" class="form-input" placeholder="CPF, e-mail, telefone ou chave aleatória">
+        </div>
+      </div>
+
+      <div class="secao-form">Quitação Circular — Débitos por Setor</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Ferramentas (R$)</label>
+          <input type="number" id="r-q-ferramentas" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seg. do Trabalho (R$)</label>
+          <input type="number" id="r-q-seguranca" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Financeiro (R$)</label>
+          <input type="number" id="r-q-financeiro" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">RH (R$)</label>
+          <input type="number" id="r-q-rh" class="form-input" placeholder="0" value="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Outros — Especificar</label>
+          <input type="text" id="r-q-outros-desc" class="form-input" placeholder="Descrição">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Outros — Valor (R$)</label>
+          <input type="number" id="r-q-outros-val" class="form-input" placeholder="0" value="0">
+        </div>
+      </div>
+
+      <div id="r-aviso-tipo" style="display:none;padding:12px 16px;border-radius:8px;font-size:12px;font-weight:700;margin-top:14px;"></div>
+
+      <div style="margin-top:20px;">
+        <button class="btn btn-danger btn-full" id="btn-salvar-rescisao" onclick="salvarRescisao()">
+          💾 SALVAR SOLICITAÇÃO DE RESCISÃO
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico Rescisões -->
+  <div class="painel">
+    <div class="painel-header">
+      <div class="painel-titulo">Histórico de Rescisões</div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="busca-rescisao" class="form-input" style="width:200px;padding:6px 12px;font-size:12px;" placeholder="🔍 Buscar nome..." oninput="filtrarRescisoes()">
+        <button class="btn btn-danger btn-sm" onclick="limparHistoricoRescisao()">🗑️ Limpar Tudo</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead>
+          <tr><th>Data Dispensa</th><th>Colaborador</th><th>Tipo</th><th>Pagamento</th><th>Débitos Quitação</th><th>Registrado por</th><th>Ação</th></tr>
+        </thead>
+        <tbody id="hist-rescisao">
+          <tr><td colspan="7" class="vazio">Carregando...</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -1174,6 +1399,7 @@ const configRef = dbRDV.collection('config').doc('rdv_counter');
 const rdvsRef   = dbRDV.collection('rdvs');
 const funcsRef  = dbRDV.collection('funcionarios');
 const folgasRef = dbBaixadas.collection('folgas');
+const rescisRef = dbRDV.collection('rescisoes');
 
 // =============================================
 // SIDEBAR TOGGLE
@@ -1264,6 +1490,7 @@ auth.onAuthStateChanged(async (user) => {
 let dbFuncs = [];
 const rdvDataMap = {};
 let historicoBaixadas = [];
+let historicoRescisoes = [];
 let contadorPassagens = 0;
 const imagensPassagens = {};
 
@@ -1274,6 +1501,7 @@ const categorias = ["PASSAGENS","ALIMENTAÇÃO","ALIMENTAÇÃO","PEDÁGIO","HOSP
 // =============================================
 const titulos = {
   'aba-rdv': 'RDV — Relatório de Despesas',
+  'aba-rescisao': 'Rescisão — Solicitação e Quitação',
   'aba-baixadas': 'Compra de Folgas / Baixadas',
   'aba-funcionarios': 'Funcionários Cadastrados',
   'aba-historico': 'Histórico Geral'
@@ -1363,7 +1591,7 @@ async function migrarFuncionariosLocais() {
 }
 
 function atualizarDatalist() {
-  ['lista-func', 'lista-func-baixadas'].forEach(id => {
+  ['lista-func', 'lista-func-baixadas', 'lista-func-rescisao'].forEach(id => {
     const dl = document.getElementById(id);
     if (!dl) return;
     dl.innerHTML = '';
@@ -1889,9 +2117,10 @@ async function gerarBaixada() {
 // =============================================
 async function carregarHistoricoGeral() {
   try {
-    const [rdvsSnap, folgasSnap] = await Promise.all([
+    const [rdvsSnap, folgasSnap, rescisSnap] = await Promise.all([
       rdvsRef.orderBy('criadoEm','desc').limit(100).get(),
-      folgasRef.orderBy('timestamp','desc').limit(100).get()
+      folgasRef.orderBy('timestamp','desc').limit(100).get(),
+      rescisRef.orderBy('criadoEm','desc').limit(100).get()
     ]);
     const rows = [];
     let somaRDV = 0, somaFolg = 0;
@@ -1905,6 +2134,10 @@ async function carregarHistoricoGeral() {
       somaFolg += parseFloat(data.total||0);
       rows.push({ tipo:'FOLGA', data: data.data||'—', nome: data.nome||'—', desc: data.regra||'—', valor: parseFloat(data.total||0) });
     });
+    rescisSnap.forEach(d => {
+      const data = d.data();
+      rows.push({ tipo:'RESCISÃO', data: data.dataDispensa||'—', nome: data.nome||'—', desc: data.tipo||'—', valor: data.quitacao?.total||0 });
+    });
     rows.sort((a,b) => b.data.split('/').reverse().join('') - a.data.split('/').reverse().join(''));
     document.getElementById('hg-rdvs').textContent = rdvsSnap.size;
     document.getElementById('hg-baixadas').textContent = folgasSnap.size;
@@ -1914,15 +2147,256 @@ async function carregarHistoricoGeral() {
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="5" class="vazio">Nenhum registro.</td></tr>'; return; }
     tbody.innerHTML = rows.map(r => `
       <tr>
-        <td><span class="badge ${r.tipo==='RDV'?'badge-ok':'badge-adm'}">${r.tipo}</span></td>
+        <td><span class="badge ${r.tipo==='RDV'?'badge-ok':r.tipo==='FOLGA'?'badge-adm':'badge-rev'}">${r.tipo}</span></td>
         <td style="font-size:11px;color:var(--cinza-txt)">${r.data}</td>
         <td style="font-weight:700">${r.nome}</td>
         <td style="font-size:12px;color:#475569">${r.desc}</td>
-        <td style="font-weight:700;color:var(--verde)">${fmtBRL(r.valor)}</td>
+        <td style="font-weight:700;color:var(--verde)">${r.valor > 0 ? fmtBRL(r.valor) : '—'}</td>
       </tr>`).join('');
   } catch(e) {
     document.getElementById('hist-geral').innerHTML = '<tr><td colspan="5" class="vazio">Erro ao carregar dados.</td></tr>';
   }
+}
+
+// =============================================
+// RESCISÃO — FUNÇÕES
+// =============================================
+function onTipoRescisaoChange() {
+  const tipo = document.getElementById('r-tipo').value;
+  const aviso = document.getElementById('r-aviso-tipo');
+  if (!tipo) { aviso.style.display = 'none'; return; }
+  aviso.style.display = 'block';
+  if (tipo.includes('empresa') || tipo.includes('iniciativa')) {
+    aviso.style.background = '#fee2e2'; aviso.style.color = '#dc2626';
+    aviso.textContent = '🔴 Rescisão por iniciativa da empresa — verificar aviso prévio e multa FGTS.';
+  } else if (tipo.includes('demissão') || tipo.includes('demissao')) {
+    aviso.style.background = '#fff3cd'; aviso.style.color = '#856404';
+    aviso.textContent = '⚠️ Pedido de demissão — colaborador não tem direito ao seguro-desemprego.';
+  } else if (tipo.includes('justa causa')) {
+    aviso.style.background = '#fde8e8'; aviso.style.color = '#b91c1c';
+    aviso.textContent = '🚨 Justa causa — verbas rescisórias reduzidas. Confirmar procedimento com DP.';
+  } else if (tipo.includes('acordo')) {
+    aviso.style.background = '#e0f2fe'; aviso.style.color = '#0369a1';
+    aviso.textContent = 'ℹ️ Acordo mútuo — indenizações proporcionais. Ambas as partes assinam.';
+  } else if (tipo.includes('antecipado')) {
+    aviso.style.background = '#fef9c3'; aviso.style.color = '#a16207';
+    aviso.textContent = '⚠️ Término antecipado — indenização de 50% dos dias restantes do contrato.';
+  } else {
+    aviso.style.display = 'none';
+  }
+}
+
+// Preenche CPF e função ao escolher colaborador
+document.addEventListener('input', e => {
+  if (e.target.id === 'r-nome') {
+    const f = dbFuncs.find(x => x.nome === e.target.value);
+    if (f) {
+      document.getElementById('r-cpf').value    = f.cpf    || '';
+      document.getElementById('r-funcao').value = f.setor  || '';
+      document.getElementById('r-banco').value  = f.banco  || '';
+      document.getElementById('r-agencia').value= f.agencia|| '';
+      document.getElementById('r-cc').value     = f.tipo === 'cc' ? (f.conta || '') : '';
+      document.getElementById('r-cp').value     = f.tipo === 'cp' ? (f.conta || '') : '';
+      document.getElementById('r-pix').value    = f.pix    || '';
+    }
+  }
+});
+
+function limparFormRescisao() {
+  ['r-nome','r-cpf','r-funcao','r-banco','r-agencia','r-cc','r-cp','r-pix',
+   'r-q-outros-desc'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  ['r-he50d','r-he60d','r-he100d','r-hn','r-he50n','r-he100n','r-ajuda',
+   'r-refeicoes','r-passagem','r-faltas-h','r-faltas-d','r-atestado',
+   'r-q-ferramentas','r-q-seguranca','r-q-financeiro','r-q-rh','r-q-outros-val']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = '0'; });
+  document.getElementById('r-tipo').value = '';
+  document.getElementById('r-empresa-demite').value = 'S';
+  document.getElementById('r-experiencia').value = 'N';
+  document.getElementById('r-antecipado').value = 'N';
+  document.getElementById('r-data-dispensa').value = '';
+  document.getElementById('r-data-pagamento').value = '';
+  document.getElementById('r-aviso-tipo').style.display = 'none';
+}
+
+function getNumRescisao(v) { return parseFloat(document.getElementById(v)?.value || 0) || 0; }
+
+async function salvarRescisao() {
+  const nome = document.getElementById('r-nome').value.trim();
+  const tipo = document.getElementById('r-tipo').value;
+  if (!nome) { toast('⚠️ Informe o nome do colaborador!', 'erro'); return; }
+  if (!tipo) { toast('⚠️ Selecione o tipo de rescisão!', 'erro'); return; }
+
+  const btn = document.getElementById('btn-salvar-rescisao');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+  const totalQuitacao = getNumRescisao('r-q-ferramentas') + getNumRescisao('r-q-seguranca') +
+    getNumRescisao('r-q-financeiro') + getNumRescisao('r-q-rh') + getNumRescisao('r-q-outros-val');
+
+  const dados = {
+    nome,
+    cpf:           document.getElementById('r-cpf').value.trim(),
+    funcao:        document.getElementById('r-funcao').value.trim(),
+    tipo,
+    empresaDemite: document.getElementById('r-empresa-demite').value,
+    experiencia:   document.getElementById('r-experiencia').value,
+    antecipado:    document.getElementById('r-antecipado').value,
+    dataDispensa:  document.getElementById('r-data-dispensa').value,
+    dataPagamento: document.getElementById('r-data-pagamento').value,
+    lancamentos: {
+      he50d:    getNumRescisao('r-he50d'),
+      he60d:    getNumRescisao('r-he60d'),
+      he100d:   getNumRescisao('r-he100d'),
+      hn:       getNumRescisao('r-hn'),
+      he50n:    getNumRescisao('r-he50n'),
+      he100n:   getNumRescisao('r-he100n'),
+      ajuda:    getNumRescisao('r-ajuda'),
+      refeicoes:getNumRescisao('r-refeicoes'),
+      passagem: getNumRescisao('r-passagem'),
+      faltasH:  getNumRescisao('r-faltas-h'),
+      faltasD:  getNumRescisao('r-faltas-d'),
+      atestado: getNumRescisao('r-atestado'),
+    },
+    banco:    document.getElementById('r-banco').value.trim(),
+    agencia:  document.getElementById('r-agencia').value.trim(),
+    contaCC:  document.getElementById('r-cc').value.trim(),
+    contaCP:  document.getElementById('r-cp').value.trim(),
+    pix:      document.getElementById('r-pix').value.trim(),
+    quitacao: {
+      ferramentas: getNumRescisao('r-q-ferramentas'),
+      seguranca:   getNumRescisao('r-q-seguranca'),
+      financeiro:  getNumRescisao('r-q-financeiro'),
+      rh:          getNumRescisao('r-q-rh'),
+      outrosDesc:  document.getElementById('r-q-outros-desc').value.trim(),
+      outrosVal:   getNumRescisao('r-q-outros-val'),
+      total:       totalQuitacao,
+    },
+    criadoPor:     usuarioAtual?.email || '—',
+    criadoPorNome: getNomeUsuario(usuarioAtual?.email || ''),
+    criadoEm:      firebase.firestore.FieldValue.serverTimestamp(),
+  };
+
+  try {
+    const ref = await rescisRef.add(dados);
+    historicoRescisoes.unshift({ id: ref.id, ...dados });
+    renderRescisoes(historicoRescisoes);
+    const cnt = historicoRescisoes.length;
+    document.getElementById('card-rescisao-count').textContent = cnt;
+    document.getElementById('nav-badge-rescisao').textContent = cnt;
+    document.getElementById('card-rescisao-tipo').textContent = tipo.split('(')[0].trim();
+    toast('✅ Rescisão salva!', 'sucesso');
+    limparFormRescisao();
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
+
+  btn.disabled = false; btn.textContent = '💾 SALVAR SOLICITAÇÃO DE RESCISÃO';
+}
+
+async function carregarRescisoes() {
+  try {
+    const snap = await rescisRef.orderBy('criadoEm','desc').get();
+    historicoRescisoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderRescisoes(historicoRescisoes);
+    const cnt = historicoRescisoes.length;
+    document.getElementById('card-rescisao-count').textContent = cnt;
+    document.getElementById('nav-badge-rescisao').textContent = cnt;
+    if (cnt > 0) document.getElementById('card-rescisao-tipo').textContent = (historicoRescisoes[0].tipo || '—').split('(')[0].trim();
+  } catch(e) {
+    document.getElementById('hist-rescisao').innerHTML = '<tr><td colspan="7" class="vazio">Erro ao carregar.</td></tr>';
+  }
+}
+
+function renderRescisoes(lista) {
+  const tbody = document.getElementById('hist-rescisao');
+  if (!lista || !lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="vazio">Nenhuma rescisão registrada.</td></tr>'; return; }
+  tbody.innerHTML = lista.map(r => {
+    const tipoLabel = (r.tipo || '—').length > 35 ? (r.tipo||'').substring(0,35) + '…' : (r.tipo || '—');
+    const totalQ = r.quitacao?.total || 0;
+    return `<tr>
+      <td style="font-size:11px;color:var(--cinza-txt)">${r.dataDispensa || '—'}</td>
+      <td style="font-weight:700">${r.nome}</td>
+      <td style="font-size:11px;">${tipoLabel}</td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${r.dataPagamento || '—'}</td>
+      <td>${totalQ > 0 ? `<span class="badge badge-rev">${fmtBRL(totalQ)}</span>` : '<span style="font-size:11px;color:var(--cinza-txt)">sem débitos</span>'}</td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${r.criadoPorNome || r.criadoPor || '—'}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" onclick="verRescisao('${r.id}')">VER</button>
+        <button class="btn btn-danger btn-sm" onclick="excluirRescisao('${r.id}','${r.nome}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function verRescisao(id) {
+  const r = historicoRescisoes.find(x => x.id === id);
+  if (!r) return;
+  const l = r.lancamentos || {};
+  const q = r.quitacao || {};
+  let lancHtml = '';
+  const lancs = [
+    ['HE 50% Diurnas', l.he50d], ['HE 60% Diurnas', l.he60d], ['HE 100% Diurnas', l.he100d],
+    ['Horas Noturnas', l.hn], ['HE 50% Noturnas', l.he50n], ['HE 100% Noturnas', l.he100n],
+    ['Ajuda de Custo', l.ajuda, true], ['Desc. Refeições', l.refeicoes, true],
+    ['Reembolso Passagem', l.passagem, true], ['Horas Faltas', l.faltasH],
+    ['Dias de Faltas', l.faltasD], ['Dias de Atestado', l.atestado],
+  ];
+  lancs.forEach(([label, val, isVal]) => {
+    if (val && val > 0) lancHtml += `<div class="modal-linha"><span class="ml">${label}</span><span class="mv">${isVal ? fmtBRL(val) : val + 'h'}</span></div>`;
+  });
+  const qItems = [
+    ['Ferramentas', q.ferramentas], ['Seg. Trabalho', q.seguranca],
+    ['Financeiro', q.financeiro], ['RH', q.rh],
+    [q.outrosDesc || 'Outros', q.outrosVal],
+  ];
+  let qHtml = '';
+  qItems.forEach(([label, val]) => { if (val && val > 0) qHtml += `<div class="modal-linha"><span class="ml">${label}</span><span class="mv badge-rev" style="color:var(--vermelho)">${fmtBRL(val)}</span></div>`; });
+
+  document.getElementById('modal-rdv-titulo').innerHTML = `📝 Rescisão — ${r.nome}`;
+  document.getElementById('modal-rdv-corpo').innerHTML = `
+    <div class="modal-linha"><span class="ml">👤 Colaborador</span><span class="mv">${r.nome}</span></div>
+    <div class="modal-linha"><span class="ml">🪪 CPF</span><span class="mv">${r.cpf||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">🏗️ Função</span><span class="mv">${r.funcao||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">📋 Tipo</span><span class="mv" style="font-size:12px;">${r.tipo||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">📅 Data Dispensa</span><span class="mv">${r.dataDispensa||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">💳 Data Pagamento</span><span class="mv">${r.dataPagamento||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">🏦 Banco</span><span class="mv">${r.banco||'—'} · ${r.agencia||'—'}</span></div>
+    <div class="modal-linha"><span class="ml">🔑 PIX</span><span class="mv">${r.pix||'—'}</span></div>
+    ${lancHtml ? `<div class="modal-linha" style="background:#f0f4ff;padding:6px 8px;border-radius:6px;font-weight:800;color:var(--azul);font-size:12px;margin-top:8px;">📊 LANÇAMENTOS</div>${lancHtml}` : ''}
+    ${qHtml ? `<div class="modal-linha" style="background:#fef2f2;padding:6px 8px;border-radius:6px;font-weight:800;color:var(--vermelho);font-size:12px;margin-top:8px;">🔴 QUITAÇÃO — DÉBITOS</div>${qHtml}
+    <div class="modal-linha" style="font-weight:800;"><span class="ml">Total Débitos</span><span class="mv mv-verm">${fmtBRL(q.total||0)}</span></div>` : ''}
+    <div class="modal-linha" style="margin-top:8px;border-top:2px solid #ddd;padding-top:8px;"><span class="ml">👤 Registrado por</span><span class="mv">${r.criadoPorNome||r.criadoPor||'—'}</span></div>`;
+  document.getElementById('modal-rdv').classList.add('show');
+}
+
+async function excluirRescisao(id, nome) {
+  if (!confirm(`Excluir rescisão de "${nome}"?`)) return;
+  try {
+    await rescisRef.doc(id).delete();
+    historicoRescisoes = historicoRescisoes.filter(r => r.id !== id);
+    renderRescisoes(historicoRescisoes);
+    const cnt = historicoRescisoes.length;
+    document.getElementById('card-rescisao-count').textContent = cnt;
+    document.getElementById('nav-badge-rescisao').textContent = cnt;
+    toast('🗑️ Rescisão removida.', 'sucesso');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
+}
+
+async function limparHistoricoRescisao() {
+  if (!confirm('⚠️ Apagar TODO o histórico de rescisões?')) return;
+  try {
+    const snap = await rescisRef.get();
+    const batch = dbRDV.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    historicoRescisoes = [];
+    renderRescisoes([]);
+    document.getElementById('card-rescisao-count').textContent = '0';
+    document.getElementById('nav-badge-rescisao').textContent = '0';
+    toast('✅ Histórico de rescisões limpo!', 'sucesso');
+  } catch(e) { toast('⚠️ Erro: ' + e.message, 'erro'); }
+}
+
+function filtrarRescisoes() {
+  const busca = document.getElementById('busca-rescisao').value.toLowerCase();
+  renderRescisoes(historicoRescisoes.filter(r => r.nome.toLowerCase().includes(busca)));
 }
 
 // =============================================
@@ -1937,6 +2411,7 @@ async function init() {
   await carregarEstadoRDV();
   await carregarFuncionarios();
   await carregarBaixadas();
+  await carregarRescisoes();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
