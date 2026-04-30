@@ -447,17 +447,23 @@ table.tbl tr:hover td { background: #f8fafd; }
 /* ===== IMPRESSÃO ===== */
 @page { size: A4; margin: 15mm 10mm 10mm 15mm; }
 @media print {
-  body > *:not(#print-area):not(#rel-baixadas) { display: none !important; }
+  body > *:not(#print-area):not(#rel-baixadas):not(#rel-rescisao) { display: none !important; }
   .app { display: none !important; }
   #tela-login { display: none !important; }
   #print-area { display: none; }
   #rel-baixadas { display: none; }
+  #rel-rescisao { display: none; }
   body.print-rdv #print-area { display: block !important; }
   body.print-rdv #rel-baixadas { display: none !important; }
+  body.print-rdv #rel-rescisao { display: none !important; }
   body.print-rdv .btn-imprimir { display: none !important; }
   body.print-rdv #btn-imprimir-wrap { display: none !important; }
   body.print-baixada #rel-baixadas { display: block !important; }
   body.print-baixada #print-area { display: none !important; }
+  body.print-baixada #rel-rescisao { display: none !important; }
+  body.print-rescisao #rel-rescisao { display: block !important; }
+  body.print-rescisao #print-area { display: none !important; }
+  body.print-rescisao #rel-baixadas { display: none !important; }
   .folha-a4 { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
   .rdv-table { font-size: 10px !important; }
   .rdv-table td, .rdv-table th { padding: 3px 5px !important; font-size: 10px !important; }
@@ -468,8 +474,23 @@ table.tbl tr:hover td { background: #f8fafd; }
   .td-soma-label, .td-soma-valor { font-size: 10px !important; }
   .td-saldo-label, .td-saldo-valor, .td-saldo-desc { font-size: 10px !important; }
   .lbl-rdv { font-size: 8px !important; }
+  .resc-page { page-break-after: always; }
+  .resc-page:last-child { page-break-after: avoid; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
+
+/* ===== RESCISÃO IMPRESSÃO ===== */
+#rel-rescisao { display: none; font-family: Arial, sans-serif; font-size: 9pt; color: #000; }
+.resc-page { width: 100%; padding: 8mm 10mm; box-sizing: border-box; }
+.resc-tbl { width: 100%; border-collapse: collapse; }
+.resc-tbl td, .resc-tbl th { border: 1px solid #000; padding: 3px 6px; vertical-align: middle; font-size: 9pt; }
+.resc-amarelo { background-color: #FFFF00; font-weight: bold; }
+.resc-header-titulo { font-size: 13pt; font-weight: bold; text-align: center; }
+.resc-header-sub { font-size: 9pt; font-weight: bold; text-align: center; }
+.resc-label { font-weight: bold; font-size: 8pt; }
+.resc-cinza { background-color: #D9D9D9; font-weight: bold; text-align: center; }
+.resc-azul { background-color: #1F4E79; color: white; font-weight: bold; text-align: center; }
+.resc-logo { width: 80px; }
 #print-area { display: none; padding: 0; }
 .folha-a4 { width: 100%; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,.15); box-sizing: border-box; }
 .rdv-table { width: 100%; border-collapse: collapse; font-size: 10px; font-family: Arial, sans-serif; border: 2px solid #333; }
@@ -1366,6 +1387,285 @@ table.tbl tr:hover td { background: #f8fafd; }
   <div class="assinatura-area">
     <div class="linha-ass">Responsável PCH Lebon Regis</div>
     <div class="linha-ass">Assinatura do Colaborador</div>
+  </div>
+</div>
+
+<!-- ===== DOCUMENTO RESCISÃO IMPRESSÃO ===== -->
+
+<div id="rel-rescisao">
+  <!-- PÁGINA 1: SOL. RESCISÃO -->
+  <div class="resc-page">
+    <table class="resc-tbl">
+      <tr>
+        <td rowspan="3" style="width:100px;text-align:center;vertical-align:middle;border:1px solid #000;padding:6px;">
+          <img id="resc-logo" style="max-width:85px;max-height:60px;">
+        </td>
+        <td colspan="5" class="resc-header-titulo" style="border:1px solid #000;padding:8px;">
+          SOLICITAÇÃO DE RESCISÃO<br>
+          <span style="font-size:10pt;">TRCT - TERMO DE RESCISÃO DO CONTRATO DE TRABALHO</span><br>
+          <span style="font-size:8pt;font-weight:normal;">PREENCHER SOMENTE OS CAMPOS EM AMARELO E LETRA MAIÚSCULA</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">NOME DA OBRA</td>
+        <td class="resc-amarelo" colspan="2" style="border:1px solid #000;" id="rp-obra">PCH LEBON REGIS</td>
+        <td class="resc-label" style="border:1px solid #000;">LOCAL</td>
+        <td class="resc-label" style="border:1px solid #000;">DATA</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">PARA</td>
+        <td class="resc-amarelo" colspan="2" style="border:1px solid #000;">MATRIZ CURITIBA - PR</td>
+        <td class="resc-amarelo" style="border:1px solid #000;">RH/DP</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-data"></td>
+      </tr>
+    </table>
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td colspan="2" class="resc-label" style="border:1px solid #000;">SOLICITO CALCULAR A RESCISÃO DO COLABORADOR(A) ABAIXO:</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;width:35%;">Nº RE E NOME DO COLABORADOR</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-nome"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">NÚMERO DO CPF</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-cpf"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">FUNÇÃO</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-funcao"></td>
+      </tr>
+      <tr>
+        <td colspan="2" class="resc-cinza" style="border:1px solid #000;">TIPO DE RESCISÃO</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">INFORME SE É A EMPRESA QUE ESTÁ DEMITINDO ?</td>
+        <td style="border:1px solid #000;">
+          <span class="resc-amarelo" style="display:inline-block;padding:2px 10px;border:1px solid #999;" id="rp-empresa">S</span>
+          &nbsp; coloque S para Sim ou N para não
+        </td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">MOTIVO:</td>
+        <td class="resc-amarelo" style="border:1px solid #000;font-weight:bold;text-align:center;" id="rp-motivo"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">INFORME SE É CONTRATO DE EXPERIÊNCIA?</td>
+        <td style="border:1px solid #000;">
+          <span class="resc-amarelo" style="display:inline-block;padding:2px 10px;border:1px solid #999;" id="rp-experiencia">N</span>
+          &nbsp; coloque S para Sim ou N para não
+        </td>
+      </tr>
+      <tr id="rp-tr-antecipado">
+        <td class="resc-label" style="border:1px solid #000;" id="rp-label-aviso">INFORME SE É AVISO PRÉVIO INDENIZADO?</td>
+        <td style="border:1px solid #000;">
+          <span class="resc-amarelo" style="display:inline-block;padding:2px 10px;border:1px solid #999;" id="rp-antecipado">N</span>
+          &nbsp; coloque S para Sim ou N para não
+        </td>
+      </tr>
+      <tr id="rp-tr-indeniz" style="display:none;">
+        <td colspan="2" style="border:1px solid #000;font-weight:bold;font-style:italic;" id="rp-indeniz"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;" id="rp-label-data-disp">Informe a Data da Dispensa</td>
+        <td style="border:1px solid #000;">
+          <span class="resc-amarelo" style="display:inline-block;padding:2px 14px;border:1px solid #999;margin-right:8px;" id="rp-data-disp"></span>
+          <span id="rp-dia-semana" style="font-size:8pt;"></span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="height:14px;border:1px solid #000;"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">A DATA DO PAGAMENTO DA RESCISÃO SERÁ EM</td>
+        <td style="border:1px solid #000;">
+          <span class="resc-amarelo" style="display:inline-block;padding:2px 14px;border:1px solid #999;margin-right:8px;" id="rp-data-pag"></span>
+          <span id="rp-dia-pag" style="font-size:8pt;"></span>
+        </td>
+      </tr>
+    </table>
+    <!-- Lançamentos -->
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td colspan="4" class="resc-cinza" style="border:1px solid #000;">INFORME ABAIXO OS LANÇAMENTOS PARA A RESCISÃO E/OU DESCREVA</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;width:30%;">035 - HORAS EXTRAS 50% DIURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;width:12%;text-align:center;" id="rp-he50d">0,00</td>
+        <td class="resc-label" style="border:1px solid #000;width:30%;">135 - AJUDA DE CUSTO</td>
+        <td class="resc-amarelo" style="border:1px solid #000;width:12%;text-align:right;" id="rp-ajuda">R$ 0,00</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">036 - HORAS EXTRAS 60% DIURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-he60d">0,00</td>
+        <td class="resc-label" style="border:1px solid #000;">1091 - DESC. REFEIÇÕES</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:right;" id="rp-refeicoes">R$ 0,00</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">049 - HORAS EXTRAS 100% DIURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-he100d">0,00</td>
+        <td class="resc-label" style="border:1px solid #000;">804 - REEMBOLSO PASSAGEM (RDV)</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:right;" id="rp-passagem">R$ 0,00</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">002 - TOTAL DE HORAS NOTURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-hn">0,00</td>
+        <td colspan="2" style="border:1px solid #000;"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">036 - HORAS EXTRAS 50% NOTURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-he50n">0,00</td>
+        <td colspan="2" style="border:1px solid #000;"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">050 - HORAS EXTRAS 100% NOTURNAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-he100n">0,00</td>
+        <td class="resc-label" style="border:1px solid #000;">023 - HORAS FALTAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-faltas-h">0,00</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;"></td>
+        <td class="resc-label" style="border:1px solid #000;">DIAS DE FALTAS</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-faltas-d">0</td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;"></td>
+        <td class="resc-label" style="border:1px solid #000;">DIAS DE ATESTADO</td>
+        <td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rp-atestado">0</td>
+      </tr>
+    </table>
+    <!-- Banco -->
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td colspan="4" class="resc-cinza" style="border:1px solid #000;font-size:8pt;">INFORME ABAIXO OS DADOS BANCÁRIOS PARA PAGAMENTO DA RESCISÃO, SE ESTE MUDOU DE BANCO</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;width:20%;">NOME DO BANCO</td>
+        <td class="resc-amarelo" style="border:1px solid #000;width:25%;" id="rp-banco"></td>
+        <td class="resc-label" style="border:1px solid #000;width:20%;">AGÊNCIA</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-agencia"></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;"></td>
+        <td class="resc-label" style="border:1px solid #000;">CONTA CORRENTE Nº</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-cc"></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;"></td>
+        <td class="resc-label" style="border:1px solid #000;">CONTA POUPANÇA Nº</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-cp"></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;"></td>
+        <td class="resc-label" style="border:1px solid #000;">CHAVE PIX</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rp-pix"></td>
+      </tr>
+    </table>
+    <!-- Assinaturas -->
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;width:33%;">SOLICITANTE</td>
+        <td style="border:1px solid #000;height:22px;"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">ENCARREGADO</td>
+        <td style="border:1px solid #000;height:22px;"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">ENGº. OU GERENTE</td>
+        <td style="border:1px solid #000;height:22px;"></td>
+      </tr>
+      <tr>
+        <td colspan="2" class="resc-cinza" style="border:1px solid #000;text-align:center;font-size:8pt;padding:6px;">
+          <strong>ATENÇÃO:</strong><br>
+          SOLICITAR O EXAME DEMISSIONAL PARA QUEM TRABALHOU MAIS DE 3 MESES<br>
+          ENVIAR O PONTO FECHADO JUNTO COM ESSA SOLICITAÇÃO
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- PÁGINA 2: QUITAÇÃO -->
+
+  <div class="resc-page">
+    <table class="resc-tbl">
+      <tr>
+        <td rowspan="2" style="width:100px;text-align:center;vertical-align:middle;border:1px solid #000;padding:6px;">
+          <img id="resc-logo2" style="max-width:85px;max-height:60px;">
+        </td>
+        <td colspan="3" class="resc-header-titulo" style="border:1px solid #000;padding:8px;">
+          QUITAÇÃO CIRCULAR<br>
+          <span style="font-size:8pt;font-weight:normal;">PREENCHER SOMENTE OS CAMPOS EM AMARELO E LETRA MAIÚSCULA</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3" style="height:10px;border:1px solid #000;"></td>
+      </tr>
+    </table>
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;width:15%;">DATA:</td>
+        <td class="resc-amarelo" style="border:1px solid #000;width:20%;" id="rq-data"></td>
+        <td class="resc-label" style="border:1px solid #000;width:20%;text-align:center;">OBRA E LOCAL:</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rq-obra">PCH LEBON REGIS</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">EMPRESA:</td>
+        <td colspan="3" style="border:1px solid #000;font-weight:bold;">BUCAGRANS CONSTRUTORA DE OBRAS LTDA</td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">COLABORADOR:</td>
+        <td colspan="3" class="resc-amarelo" style="border:1px solid #000;" id="rq-nome"></td>
+      </tr>
+      <tr>
+        <td class="resc-label" style="border:1px solid #000;">FUNÇÃO:</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rq-funcao"></td>
+        <td class="resc-label" style="border:1px solid #000;text-align:center;">DEPARTAMENTO:</td>
+        <td class="resc-amarelo" style="border:1px solid #000;" id="rq-dept">OPERACIONAL</td>
+      </tr>
+    </table>
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td class="resc-label resc-azul" style="border:1px solid #000;width:55%;">SETORES</td>
+        <td class="resc-label resc-azul" style="border:1px solid #000;width:22%;text-align:center;">VALOR DO DÉBITO</td>
+        <td class="resc-label resc-azul" style="border:1px solid #000;">VISTO RESPONSÁVEL</td>
+      </tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">FERRAMENTAS</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rq-ferr"></td><td style="border:1px solid #000;height:18px;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">SEG. DO TRABALHO</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rq-seg"></td><td style="border:1px solid #000;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">FINANCEIRO</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rq-fin"></td><td style="border:1px solid #000;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">RH</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rq-rh"></td><td style="border:1px solid #000;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">FERRAMENTAS</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;">R$ 0,00</td><td style="border:1px solid #000;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;">SEG. DO TRABALHO</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;">R$ 0,00</td><td style="border:1px solid #000;"></td></tr>
+      <tr><td class="resc-label" style="border:1px solid #000;" id="rq-outros-label">OUTROS (Especificar)</td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;" id="rq-outros"></td><td style="border:1px solid #000;"></td></tr>
+      <tr><td style="border:1px solid #000;"></td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;">R$ 0,00</td><td style="border:1px solid #000;"></td></tr>
+      <tr><td style="border:1px solid #000;"></td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;">R$ 0,00</td><td style="border:1px solid #000;"></td></tr>
+      <tr><td style="border:1px solid #000;"></td><td class="resc-amarelo" style="border:1px solid #000;text-align:center;">R$ 0,00</td><td style="border:1px solid #000;"></td></tr>
+    </table>
+    <table class="resc-tbl" style="margin-top:-1px;">
+      <tr>
+        <td style="border:1px solid #000;text-align:center;font-size:8pt;padding:10px;" colspan="2">
+          Eu abaixo assinado, nesta data, autorizo o desconto dos débitos acima mencionados do meu saldo dos valores da minha rescisão do contrato de trabalho.
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border:1px solid #000;text-align:center;padding:8px;">
+          <span class="resc-amarelo" style="display:inline-block;padding:4px 40px;font-weight:bold;" id="rq-data-ass"></span>
+        </td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;height:40px;"></td>
+        <td style="border:1px solid #000;height:40px;"></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid #000;text-align:center;font-size:8pt;font-weight:bold;">VISTO ADMINISTRATIVO/RH<br>OBRA</td>
+        <td style="border:1px solid #000;text-align:center;font-size:8pt;font-weight:bold;" id="rq-colab-ass"></td>
+      </tr>
+      <tr>
+        <td colspan="2" class="resc-cinza" style="border:1px solid #000;text-align:center;font-size:8pt;font-weight:bold;padding:6px;">
+          ATENÇÃO: O COLABORADOR DEVERÁ DEVOLVER OS UNIFORMES
+        </td>
+      </tr>
+    </table>
   </div>
 </div>
 
@@ -2321,6 +2621,7 @@ function renderRescisoes(lista) {
       <td style="font-size:11px;color:var(--cinza-txt)">${r.criadoPorNome || r.criadoPor || '—'}</td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-primary btn-sm" onclick="verRescisao('${r.id}')">VER</button>
+        <button class="btn btn-secondary btn-sm" onclick="imprimirRescisao('${r.id}')">🖨️</button>
         <button class="btn btn-success btn-sm" onclick="gerarPlanilhaRescisao('${r.id}')">📥 XLS</button>
         <button class="btn btn-danger btn-sm" onclick="excluirRescisao('${r.id}','${r.nome}')">🗑️</button>
       </td>
@@ -2366,9 +2667,12 @@ function verRescisao(id) {
     ${qHtml ? `<div class="modal-linha" style="background:#fef2f2;padding:6px 8px;border-radius:6px;font-weight:800;color:var(--vermelho);font-size:12px;margin-top:8px;">🔴 QUITAÇÃO — DÉBITOS</div>${qHtml}
     <div class="modal-linha" style="font-weight:800;"><span class="ml">Total Débitos</span><span class="mv mv-verm">${fmtBRL(q.total||0)}</span></div>` : ''}
     <div class="modal-linha" style="margin-top:8px;border-top:2px solid #ddd;padding-top:8px;"><span class="ml">👤 Registrado por</span><span class="mv">${r.criadoPorNome||r.criadoPor||'—'}</span></div>
-    <div style="margin-top:16px;">
-      <button class="btn btn-success btn-full" onclick="gerarPlanilhaRescisao('${r.id}');fecharModal('modal-rdv')">
-        📥 BAIXAR PLANILHA PREENCHIDA (.xlsx)
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn btn-secondary" style="flex:1" onclick="imprimirRescisao('${r.id}');fecharModal('modal-rdv')">
+        🖨️ IMPRIMIR DOCUMENTO
+      </button>
+      <button class="btn btn-success" style="flex:1" onclick="gerarPlanilhaRescisao('${r.id}');fecharModal('modal-rdv')">
+        📥 BAIXAR PLANILHA (.xlsx)
       </button>
     </div>`;
   document.getElementById('modal-rdv').classList.add('show');
@@ -2422,6 +2726,93 @@ async function init() {
   await carregarRescisoes();
 }
 
+
+// =============================================
+// RESCISÃO — IMPRIMIR HTML
+// =============================================
+function imprimirRescisao(id) {
+  const r = historicoRescisoes.find(x => x.id === id);
+  if (!r) { toast('⚠️ Registro não encontrado!', 'erro'); return; }
+
+  const l = r.lancamentos || {};
+  const q = r.quitacao   || {};
+  const fmtN = v => (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  const fmtR = v => 'R$ ' + fmtN(v);
+  const dias = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const fmtData = s => { if (!s) return ''; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+  const diaSem = s => { if (!s) return ''; const d = new Date(s+'T12:00:00'); return dias[d.getDay()]; };
+
+  // Motivo dinâmico
+  const motivo = (r.empresaDemite||'N').toUpperCase() === 'S'
+    ? 'RESCISÃO POR INICIATIVA DA EMPRESA' : 'PEDIDO DE DEMISSÃO';
+  const labelAviso = (r.experiencia||'N').toUpperCase() === 'S'
+    ? 'INFORME SE É TÉRMINO ANTECIPADO ?'
+    : ((r.empresaDemite||'N').toUpperCase() === 'S'
+        ? 'INFORME SE É AVISO PRÉVIO INDENIZADO?' : 'INFORME SE É AVISO PRÉVIO TRABALHADO ?');
+  const indeniz = (r.experiencia||'N').toUpperCase()==='S' && (r.antecipado||'N').toUpperCase()==='S'
+    ? ((r.empresaDemite||'N').toUpperCase()==='S'
+        ? 'Será indenizado 50% dos dias que faltam para o término do contrato.'
+        : 'Será descontado 50% dos dias que faltam para o término do contrato.') : '';
+
+  // Preenche LOGO
+  const logoSrc = document.querySelector('img[src^="data:image"]')?.src || '';
+  document.getElementById('resc-logo').src  = logoSrc;
+  document.getElementById('resc-logo2').src = logoSrc;
+
+  // Página 1
+  document.getElementById('rp-data').textContent    = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('rp-nome').textContent    = r.nome   || '';
+  document.getElementById('rp-cpf').textContent     = r.cpf    || '';
+  document.getElementById('rp-funcao').textContent  = r.funcao || '';
+  document.getElementById('rp-empresa').textContent = (r.empresaDemite||'N').toUpperCase();
+  document.getElementById('rp-motivo').textContent  = motivo;
+  document.getElementById('rp-experiencia').textContent = (r.experiencia||'N').toUpperCase();
+  document.getElementById('rp-label-aviso').textContent = labelAviso;
+  document.getElementById('rp-antecipado').textContent  = (r.antecipado||'N').toUpperCase();
+  const trIndeniz = document.getElementById('rp-tr-indeniz');
+  if (indeniz) { trIndeniz.style.display=''; document.getElementById('rp-indeniz').textContent = indeniz; }
+  else trIndeniz.style.display = 'none';
+  document.getElementById('rp-data-disp').textContent = fmtData(r.dataDispensa);
+  document.getElementById('rp-dia-semana').textContent = diaSem(r.dataDispensa);
+  document.getElementById('rp-data-pag').textContent  = fmtData(r.dataPagamento);
+  document.getElementById('rp-dia-pag').textContent   = diaSem(r.dataPagamento);
+  // Lançamentos
+  document.getElementById('rp-he50d').textContent  = fmtN(l.he50d);
+  document.getElementById('rp-he60d').textContent  = fmtN(l.he60d);
+  document.getElementById('rp-he100d').textContent = fmtN(l.he100d);
+  document.getElementById('rp-hn').textContent     = fmtN(l.hn);
+  document.getElementById('rp-he50n').textContent  = fmtN(l.he50n);
+  document.getElementById('rp-he100n').textContent = fmtN(l.he100n);
+  document.getElementById('rp-ajuda').textContent    = fmtR(l.ajuda);
+  document.getElementById('rp-refeicoes').textContent= fmtR(l.refeicoes);
+  document.getElementById('rp-passagem').textContent = fmtR(l.passagem);
+  document.getElementById('rp-faltas-h').textContent = fmtN(l.faltasH);
+  document.getElementById('rp-faltas-d').textContent = l.faltasD || 0;
+  document.getElementById('rp-atestado').textContent = l.atestado || 0;
+  // Banco
+  document.getElementById('rp-banco').textContent   = r.banco   || '';
+  document.getElementById('rp-agencia').textContent = r.agencia || '';
+  document.getElementById('rp-cc').textContent      = r.contaCC || '';
+  document.getElementById('rp-cp').textContent      = r.contaCP || '';
+  document.getElementById('rp-pix').textContent     = r.pix     || '';
+  // Página 2
+  document.getElementById('rq-data').textContent     = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('rq-nome').textContent     = r.nome   || '';
+  document.getElementById('rq-funcao').textContent   = r.funcao || '';
+  document.getElementById('rq-data-ass').textContent = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('rq-colab-ass').textContent = r.nome  || '';
+  document.getElementById('rq-ferr').textContent = fmtR(q.ferramentas);
+  document.getElementById('rq-seg').textContent  = fmtR(q.seguranca);
+  document.getElementById('rq-fin').textContent  = fmtR(q.financeiro);
+  document.getElementById('rq-rh').textContent   = fmtR(q.rh);
+  document.getElementById('rq-outros').textContent = fmtR(q.outrosVal);
+  if (q.outrosDesc) document.getElementById('rq-outros-label').textContent = 'OUTROS: ' + q.outrosDesc;
+
+  document.body.classList.remove('print-rdv','print-baixada');
+  document.body.classList.add('print-rescisao');
+  window.print();
+  document.body.classList.remove('print-rescisao');
+}
 
 // =============================================
 // RESCISÃO — GERAR PLANILHA XLSX
