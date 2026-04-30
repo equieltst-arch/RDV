@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 
 <style>
 :root {
@@ -396,9 +397,14 @@ table.tbl tr:hover td { background: #f8fafd; }
 /* ===== IMPRESSÃO ===== */
 @page { size: A4; margin: 0; }
 @media print {
-  .sidebar, .topbar, .content > .aba:not(.printing), .toast { display: none !important; }
-  .main { margin-left: 0 !important; }
-  #print-area { display: block !important; }
+  body > *:not(#print-area):not(#rel-baixadas) { display: none !important; }
+  .app { display: none !important; }
+  #print-area { display: none; }
+  #rel-baixadas { display: none; }
+  body.print-rdv #print-area { display: flex !important; }
+  body.print-rdv #rel-baixadas { display: none !important; }
+  body.print-baixada #rel-baixadas { display: block !important; }
+  body.print-baixada #print-area { display: none !important; }
   .folha-a4 { box-shadow: none !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
@@ -432,10 +438,108 @@ table.tbl tr:hover td { background: #f8fafd; }
 /* ===== SPINNER ===== */
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== TELA DE LOGIN ===== */
+#tela-login {
+  position: fixed; inset: 0; z-index: 99999;
+  background: linear-gradient(135deg, #0f2244 0%, #1B3A6B 60%, #2952a3 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+#tela-login.oculto { display: none; }
+.login-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 38px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.35);
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.login-logo .company {
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--azul);
+  letter-spacing: -.3px;
+}
+.login-logo .project {
+  font-size: 11px;
+  color: var(--cinza-txt);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+.login-logo .divider {
+  width: 40px; height: 3px;
+  background: var(--azul);
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+.login-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--azul);
+  margin-bottom: 20px;
+  text-align: center;
+}
+.login-erro {
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  display: none;
+}
+.login-erro.show { display: block; }
+.login-btn {
+  width: 100%;
+  background: var(--azul);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.login-btn:hover { background: var(--azul-esc); }
+.login-btn:disabled { opacity: .6; cursor: not-allowed; }
 </style>
 
 </head>
 <body>
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="tela-login">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="company">Bucagrans</div>
+      <div class="project">PCH · Lebon Regis</div>
+      <div class="divider"></div>
+    </div>
+    <div class="login-title">Acesso ao Sistema</div>
+    <div class="login-erro" id="login-erro">E-mail ou senha incorretos.</div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">E-mail</label>
+      <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')fazerLogin()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <input type="password" id="login-senha" class="form-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')fazerLogin()">
+    </div>
+    <button class="login-btn" id="btn-login" onclick="fazerLogin()">🔐 ENTRAR</button>
+  </div>
+</div>
+
 <div class="app">
 
 <!-- ===== SIDEBAR ===== -->
@@ -485,6 +589,11 @@ table.tbl tr:hover td { background: #f8fafd; }
     <div class="topbar-title" id="topbar-title">RDV — Relatório de Despesas</div>
     <div class="topbar-right">
       <span class="topbar-date" id="data-topo">--/--/----</span>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:12px;padding-left:12px;border-left:1px solid var(--cinza-brd);">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--azul);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;" id="user-avatar">?</div>
+        <span style="font-size:12px;font-weight:700;color:#475569;" id="user-nome">—</span>
+        <button class="btn btn-secondary btn-sm" onclick="fazerLogout()" style="padding:4px 10px;font-size:11px;">Sair</button>
+      </div>
     </div>
   </div>
 
@@ -552,6 +661,7 @@ table.tbl tr:hover td { background: #f8fafd; }
             <th>Destino</th>
             <th>Total Despesas</th>
             <th>Saldo</th>
+            <th>Gerado por</th>
             <th>Data</th>
             <th>Ações</th>
           </tr>
@@ -644,7 +754,7 @@ table.tbl tr:hover td { background: #f8fafd; }
     <div class="table-wrap">
       <table class="tbl">
         <thead>
-          <tr><th>Data</th><th>Colaborador</th><th>Regra</th><th>Total</th><th>Ação</th></tr>
+          <tr><th>Data</th><th>Colaborador</th><th>Regra</th><th>Total</th><th>Gerado por</th><th>Ação</th></tr>
         </thead>
         <tbody id="hist-baixadas">
           <tr><td colspan="5" class="vazio">Carregando...</td></tr>
@@ -985,11 +1095,81 @@ const fireBAIXADAS = firebase.initializeApp({
 
 const dbRDV      = fireRDV.firestore();
 const dbBaixadas = fireBAIXADAS.firestore();
+const auth       = fireRDV.auth();
 
 const configRef = dbRDV.collection('config').doc('rdv_counter');
 const rdvsRef   = dbRDV.collection('rdvs');
 const funcsRef  = dbRDV.collection('funcionarios');
 const folgasRef = dbBaixadas.collection('folgas');
+
+// =============================================
+// AUTH — USUÁRIO ATUAL
+// =============================================
+let usuarioAtual = null;
+
+const nomesUsuarios = {
+  'equiel@bucagrans.com.br': 'Equiel',
+  'douglas@bucagrans.com.br': 'Douglas'
+};
+
+function getNomeUsuario(email) {
+  return nomesUsuarios[email] || email.split('@')[0];
+}
+
+function getIniciais(email) {
+  const nome = getNomeUsuario(email);
+  return nome.substring(0, 2).toUpperCase();
+}
+
+function atualizarChipUsuario(user) {
+  if (!user) return;
+  const nome = getNomeUsuario(user.email);
+  document.getElementById('user-nome').textContent = nome;
+  document.getElementById('user-avatar').textContent = getIniciais(user.email);
+}
+
+async function fazerLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const btn   = document.getElementById('btn-login');
+  const erro  = document.getElementById('login-erro');
+
+  erro.classList.remove('show');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Entrando...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    // onAuthStateChanged cuida do resto
+  } catch(e) {
+    erro.textContent = 'E-mail ou senha incorretos.';
+    erro.classList.add('show');
+    btn.disabled = false;
+    btn.innerHTML = '🔐 ENTRAR';
+  }
+}
+
+async function fazerLogout() {
+  if (!confirm('Deseja sair do sistema?')) return;
+  await auth.signOut();
+}
+
+// Observador de estado de autenticação
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    // Usuário autorizado
+    usuarioAtual = user;
+    document.getElementById('tela-login').classList.add('oculto');
+    atualizarChipUsuario(user);
+    await init();
+  } else {
+    // Não autenticado — mostrar login
+    usuarioAtual = null;
+    document.getElementById('tela-login').classList.remove('oculto');
+    document.getElementById('btn-login').disabled = false;
+    document.getElementById('btn-login').innerHTML = '🔐 ENTRAR';
+  }
+});
 
 // =============================================
 // ESTADO GLOBAL
@@ -1165,13 +1345,13 @@ async function salvarFuncionario() {
   try {
     const docId = document.getElementById('cad-doc-id').value;
     if (docId) {
-      await funcsRef.doc(docId).update({ ...dados, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+      await funcsRef.doc(docId).update({ ...dados, atualizadoEm: firebase.firestore.FieldValue.serverTimestamp(), atualizadoPor: usuarioAtual?.email || '—', atualizadoPorNome: getNomeUsuario(usuarioAtual?.email || '') });
       const idx = dbFuncs.findIndex(f => f.id === docId);
       if (idx !== -1) dbFuncs[idx] = { id: docId, ...dados };
       toast(`✅ ${nome} atualizado!`, 'sucesso');
     } else {
       if (dbFuncs.some(f => f.nome === nome)) { toast('⚠️ Nome já cadastrado!', 'erro'); btn.disabled = false; btn.textContent = '💾 SALVAR FUNCIONÁRIO'; return; }
-      const ref = await funcsRef.add({ ...dados, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+      const ref = await funcsRef.add({ ...dados, criadoEm: firebase.firestore.FieldValue.serverTimestamp(), criadoPor: usuarioAtual?.email || '—', criadoPorNome: getNomeUsuario(usuarioAtual?.email || '') });
       dbFuncs.push({ id: ref.id, ...dados });
       toast(`✅ ${nome} cadastrado!`, 'sucesso');
     }
@@ -1242,6 +1422,7 @@ function renderHistoricoRDV(snap) {
       <td>${d.destino||'—'}</td>
       <td>${d.totalDespesas !== undefined ? fmtBRL(d.totalDespesas) : '—'}</td>
       <td><span class="badge ${saldo>=0?'badge-ok':'badge-rev'}">${fmtBRL(Math.abs(saldo))}</span></td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${d.criadoPorNome || d.criadoPor || '—'}</td>
       <td style="font-size:11px;color:var(--cinza-txt)">${dt}</td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-primary btn-sm" data-id="${docId}">VER</button>
@@ -1402,13 +1583,16 @@ async function finalizarRDV() {
   const despesasCat = {};
   categoriasRDV.forEach((cat,idx) => { const txt = (document.getElementById('total-cat-'+idx)?.textContent||'').replace('R$','').replace(/\./g,'').replace(',','.').replace('-','0').trim(); const val = parseFloat(txt)||0; if (val>0) despesasCat[cat] = (despesasCat[cat]||0)+val; });
   try {
-    await rdvsRef.add({ numero:num, colaborador, setor, motivo, totalDespesas, adiantamento, saldo, destino: document.getElementById('f-destino').value||'', despesasCat, criadoEm: firebase.firestore.FieldValue.serverTimestamp() });
+    await rdvsRef.add({ numero:num, colaborador, setor, motivo, totalDespesas, adiantamento, saldo, destino: document.getElementById('f-destino').value||'', despesasCat, criadoEm: firebase.firestore.FieldValue.serverTimestamp(), criadoPor: usuarioAtual?.email || '—', criadoPorNome: getNomeUsuario(usuarioAtual?.email || '') });
     const prox = String(parseInt(num)+1).padStart(3,'0');
     await configRef.update({ ultimoRDV: prox, totalGerados: firebase.firestore.FieldValue.increment(1) });
     toast(`✅ RDV #${num} salvo!`, 'sucesso');
   } catch(e) { toast('⚠️ Erro ao salvar: ' + e.message, 'erro'); }
   document.title = "RDV_" + num + "_" + colaborador.replace(/\s+/g,'_');
+  document.body.classList.remove('print-baixada');
+  document.body.classList.add('print-rdv');
   window.print();
+  document.body.classList.remove('print-rdv');
   setTimeout(() => location.reload(), 1200);
 }
 
@@ -1443,6 +1627,7 @@ function renderBaixadas(lista) {
       <td style="font-weight:700">${item.nome}</td>
       <td>${badgeRegra}</td>
       <td style="font-weight:700;color:var(--verde)">${fmtBRL(parseFloat(item.total||0))}</td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${item.criadoPorNome || item.criadoPor || '—'}</td>
       <td><button class="btn btn-danger btn-sm" onclick="excluirBaixada('${item.id}')">🗑️</button></td>
     </tr>`;
   }).join('');
@@ -1591,7 +1776,7 @@ async function gerarBaixada() {
     document.getElementById('rel-itens').innerHTML = `<tr><td style="padding:10px;border:1px solid #ddd">Indenização de ${dias} dias de folga remunerada (Base R$ ${sal.toFixed(2)})</td><td style="padding:10px;border:1px solid #ddd;text-align:right">R$ ${indeniza.toFixed(2)}</td></tr>` + htmlPassRef;
   }
   try {
-    const registro = { data, nome, regra: regraTexto, ...(especial ? {} : { salario: sal, dias, indeniza: indeniza.toFixed(2) }), passagens: passagensData, totalPassagens: totalPassagens.toFixed(2), total: totalGeral.toFixed(2), timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+    const registro = { data, nome, regra: regraTexto, ...(especial ? {} : { salario: sal, dias, indeniza: indeniza.toFixed(2) }), passagens: passagensData, totalPassagens: totalPassagens.toFixed(2), total: totalGeral.toFixed(2), timestamp: firebase.firestore.FieldValue.serverTimestamp(), criadoPor: usuarioAtual?.email || '—', criadoPorNome: getNomeUsuario(usuarioAtual?.email || '') };
     const docRef = await folgasRef.add(registro);
     historicoBaixadas.unshift({ id: docRef.id, ...registro });
     renderBaixadas(historicoBaixadas);
@@ -1601,7 +1786,12 @@ async function gerarBaixada() {
     document.getElementById('rel-baixadas').style.display = 'block';
     toast('✅ Salvo no Firebase!', 'sucesso');
     window.scrollTo(0, document.body.scrollHeight);
-    setTimeout(() => window.print(), 500);
+    setTimeout(() => {
+      document.body.classList.remove('print-rdv');
+      document.body.classList.add('print-baixada');
+      window.print();
+      document.body.classList.remove('print-baixada');
+    }, 500);
   } catch(e) { toast('Erro ao salvar: ' + e.message, 'erro'); }
   btn.innerHTML = '📄 GERAR RELATÓRIO E SALVAR'; btn.disabled = false;
 }
@@ -1661,7 +1851,9 @@ async function init() {
   await carregarBaixadas();
 }
 
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', () => {
+  // Init é chamado pelo onAuthStateChanged após login
+});
 </script>
 
 </body>
