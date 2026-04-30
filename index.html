@@ -43,7 +43,55 @@ body { font-family: 'Nunito Sans', sans-serif; background: var(--cinza-bg); colo
   top: 0; left: 0; bottom: 0;
   z-index: 200;
   box-shadow: 4px 0 20px rgba(15,34,68,.25);
+  transition: width .22s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
 }
+.sidebar.recolhida {
+  width: 54px;
+}
+.sidebar.recolhida .sidebar-logo .company,
+.sidebar.recolhida .sidebar-logo .project,
+.sidebar.recolhida .sidebar-logo .status-bar,
+.sidebar.recolhida .nav-label,
+.sidebar.recolhida .nav-item span:not(.ico),
+.sidebar.recolhida .badge-nav,
+.sidebar.recolhida .sidebar-footer {
+  display: none;
+}
+.sidebar.recolhida .nav-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+.sidebar.recolhida .sidebar-logo {
+  padding: 14px 0;
+  display: flex;
+  justify-content: center;
+}
+.sidebar.recolhida .btn-toggle-sidebar {
+  left: 54px;
+}
+
+.btn-toggle-sidebar {
+  position: fixed;
+  top: 14px;
+  left: var(--sidebar-w);
+  z-index: 300;
+  width: 24px;
+  height: 24px;
+  background: var(--azul);
+  border: 2px solid rgba(255,255,255,.2);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left .22s cubic-bezier(.4,0,.2,1), transform .22s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.btn-toggle-sidebar:hover { background: var(--azul-med); }
+.btn-toggle-sidebar.recolhido { left: 54px; }
 .sidebar-logo {
   padding: 22px 20px 18px;
   border-bottom: 1px solid rgba(255,255,255,.1);
@@ -133,7 +181,9 @@ body { font-family: 'Nunito Sans', sans-serif; background: var(--cinza-bg); colo
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  transition: margin-left .22s cubic-bezier(.4,0,.2,1);
 }
+.main.expandido { margin-left: 54px; }
 
 .topbar {
   background: #fff;
@@ -395,7 +445,7 @@ table.tbl tr:hover td { background: #f8fafd; }
 }
 
 /* ===== IMPRESSÃO ===== */
-@page { size: A4; margin: 8mm 10mm; }
+@page { size: A4; margin: 4mm 6mm; }
 @media print {
   body > *:not(#print-area):not(#rel-baixadas) { display: none !important; }
   .app { display: none !important; }
@@ -408,10 +458,12 @@ table.tbl tr:hover td { background: #f8fafd; }
   body.print-baixada #rel-baixadas { display: block !important; }
   body.print-baixada #print-area { display: none !important; }
   .folha-a4 { box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+  .rdv-table td, .rdv-table th { padding: 2px 4px !important; }
+  .td-valor-input input { height: 15px !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
-#print-area { display: none; padding: 20px 0 50px; justify-content: center; flex-direction: column; align-items: center; }
-.folha-a4 { width: 210mm; min-height: 297mm; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+#print-area { display: none; padding: 0; }
+.folha-a4 { width: 100%; background: white; padding: 8mm 10mm; box-shadow: 0 10px 30px rgba(0,0,0,.15); box-sizing: border-box; }
 .rdv-table { width: 100%; border-collapse: collapse; font-size: 9px; font-family: Arial, sans-serif; border: 2px solid #333; }
 .rdv-table td, .rdv-table th { border: 1.5px solid #555; padding: 3px 6px; vertical-align: middle; }
 .rdv-table input, .rdv-table select { border: none; background: transparent; font-family: Arial, sans-serif; font-size: 9px; outline: none; width: 100%; padding: 0; }
@@ -541,6 +593,10 @@ table.tbl tr:hover td { background: #f8fafd; }
     <button class="login-btn" id="btn-login" onclick="fazerLogin()">🔐 ENTRAR</button>
   </div>
 </div>
+
+<!-- ===== BOTÃO RECOLHER SIDEBAR ===== -->
+
+<button class="btn-toggle-sidebar" id="btn-toggle" onclick="toggleSidebar()" title="Recolher menu">‹</button>
 
 <div class="app">
 
@@ -998,30 +1054,32 @@ table.tbl tr:hover td { background: #f8fafd; }
     <table class="rdv-table" style="border-top:none;margin-top:-1px;">
       <tr><td style="text-align:center;font-weight:bold;font-size:8.5px;background:#D9D9D9;padding:5px;">DECLARO HAVER RECEBIDO NESTA DATA AS DESPESAS DE VIAGEM ACIMA ESPECIFICADAS</td></tr>
     </table>
-    <div style="margin-top:22px;font-family:Arial,sans-serif;">
-      <div style="display:flex;gap:50px;padding:0 20px;margin-bottom:32px;">
-        <div style="flex:0 0 36%;text-align:center;">
-          <div style="border-bottom:1px solid #000;min-height:28px;font-size:10px;font-weight:bold;color:#c00;text-align:center;padding-bottom:3px;">
-            <input type="text" id="f-data-ass" style="color:#c00;font-weight:bold;font-size:10px;width:100%;border:none;outline:none;background:transparent;font-family:Arial;text-align:center;">
-          </div>
-          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">DATA</div>
+    <div style="margin-top: 10px; font-family: Arial, sans-serif;">
+        <div style="display: flex; gap: 50px; padding: 0 20px; margin-bottom: 18px;">
+            <div style="flex: 0 0 36%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 22px; font-size:10px; font-weight:bold; color:#c00; text-align:center; padding-bottom:2px;">
+                    <input type="text" id="f-data-ass" style="color:#c00; font-weight:bold; font-size:10px; width:100%; border:none; outline:none; background:transparent; font-family:Arial; text-align:center;">
+                </div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:2px;">DATA</div>
+            </div>
+            <div style="flex: 0 0 52%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 22px;"></div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:2px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
+            </div>
         </div>
-        <div style="flex:0 0 52%;text-align:center;">
-          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
-          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">RH E/OU SUPERVISOR ADM DA OBRA</div>
+        <div style="display: flex; gap: 50px; padding: 0 20px;">
+            <div style="flex: 0 0 36%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 22px;"></div>
+                <div style="font-size:9px; font-weight:bold; color:#000; text-align:center; margin-top:2px;">
+                    <span id="ass-nome"></span>
+                </div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:1px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
+            </div>
+            <div style="flex: 0 0 52%; text-align:center;">
+                <div style="border-bottom: 1px solid #000; min-height: 22px;"></div>
+                <div style="font-size:8px; font-weight:bold; text-align:center; margin-top:2px;">GESTOR ADM / FINANCEIRO</div>
+            </div>
         </div>
-      </div>
-      <div style="display:flex;gap:50px;padding:0 20px;">
-        <div style="flex:0 0 36%;text-align:center;">
-          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
-          <div style="font-size:9px;font-weight:bold;color:#000;text-align:center;margin-top:3px;"><span id="ass-nome"></span></div>
-          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:1px;">ASSINATURA DO COLABORADOR / VIAJANTE</div>
-        </div>
-        <div style="flex:0 0 52%;text-align:center;">
-          <div style="border-bottom:1px solid #000;min-height:28px;"></div>
-          <div style="font-size:8px;font-weight:bold;text-align:center;margin-top:3px;">GESTOR ADM / FINANCEIRO</div>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -1103,6 +1161,20 @@ const configRef = dbRDV.collection('config').doc('rdv_counter');
 const rdvsRef   = dbRDV.collection('rdvs');
 const funcsRef  = dbRDV.collection('funcionarios');
 const folgasRef = dbBaixadas.collection('folgas');
+
+// =============================================
+// SIDEBAR TOGGLE
+// =============================================
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const main    = document.querySelector('.main');
+  const btn     = document.getElementById('btn-toggle');
+  const recolhida = sidebar.classList.toggle('recolhida');
+  main.classList.toggle('expandido', recolhida);
+  btn.classList.toggle('recolhido', recolhida);
+  btn.textContent = recolhida ? '›' : '‹';
+  btn.title = recolhida ? 'Expandir menu' : 'Recolher menu';
+}
 
 // =============================================
 // AUTH — USUÁRIO ATUAL
