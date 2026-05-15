@@ -2989,14 +2989,14 @@ const saldo = total - adiant;
 const el = document.getElementById(‘edit-saldo-preview’);
 if (el) {
 el.textContent = ‘Total: ’ + fmtBRL(total) + ’  |  Saldo: ’ + fmtBRL(Math.abs(saldo)) + (saldo < 0 ? ’ (devolver)’ : ’ (a pagar)’);
-el.style.color = saldo >= 0 ? ‘var(–verde)’ : ‘var(–vermelho)’;
+el.style.color = saldo >= 0 ? ‘var(-verde)’ : ‘var(-vermelho)’;
 }
 }
 
 async function salvarEdicaoRDV() {
 if (!rdvEditandoId || !rdvEditandoData) return;
 const btn = document.getElementById(‘btn-salvar-edit-rdv’);
-btn.disabled = true; btn.innerHTML = ‘<span class="spinner"></span> Salvando…’;
+btn.disabled = true; btn.innerHTML = ‘<span class="spinner"></span> Salvando...’;
 
 const cats = [‘PASSAGENS’,‘ALIMENTAÇÃO’,‘PEDÁGIO’,‘HOSPEDAGEM’,‘COMBUSTIVEL’,‘TAXI’,‘ESTACIONAMENTO’,‘OUTROS’];
 const despesasCat = {};
@@ -3020,7 +3020,7 @@ editadoEm: firebase.firestore.FieldValue.serverTimestamp(),
 editadoPor: usuarioAtual?.email || ‘—’,
 editadoPorNome: getNomeUsuario(usuarioAtual?.email || ‘’)
 });
-rdvDataMap[rdvEditandoId] = { …rdvDataMap[rdvEditandoId], destino, motivo, despesasCat, totalDespesas, adiantamento, saldo };
+rdvDataMap[rdvEditandoId] = { ...rdvDataMap[rdvEditandoId], destino, motivo, despesasCat, totalDespesas, adiantamento, saldo };
 toast(‘✅ RDV #’ + rdvEditandoData.numero + ’ atualizado!’, ‘sucesso’);
 fecharModal(‘modal-edit-rdv’);
 await carregarEstadoRDV();
@@ -3088,7 +3088,7 @@ document.getElementById(‘val-geral’).textContent = total === 0
 const saldo = d.saldo || 0;
 document.getElementById(‘val-saldo’).value = saldo.toLocaleString(‘pt-BR’,{style:‘currency’,currency:‘BRL’});
 
-document.title = ‘RDV_’ + d.numero + ‘*’ + (d.colaborador||’’).replace(/\s+/g,’*’);
+document.title = ‘RDV_’ + d.numero + ‘_’ + (d.colaborador||’’).replace(/\s+/g,’*’);
 document.body.classList.remove(‘print-baixada’,‘print-rescisao’);
 document.body.classList.add(‘print-rdv’);
 window.print();
