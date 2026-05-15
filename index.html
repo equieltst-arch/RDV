@@ -1159,18 +1159,6 @@ table.tbl tr:hover td { background: #f8fafd; }
     <div id="modal-rdv-corpo"></div>
   </div>
 </div>
-<!-- ===== MODAL EDITAR RDV ===== -->
-
-<div class="modal-overlay" id="modal-edit-rdv" onclick="fecharModalClick(event,'modal-edit-rdv')">
-  <div class="modal-box" style="max-width:620px;">
-    <button class="modal-fechar" onclick="fecharModal('modal-edit-rdv')">✕</button>
-    <div class="modal-titulo">✏️ Editar RDV — <span id="edit-rdv-titulo"></span></div>
-    <div id="edit-rdv-corpo"></div>
-    <button class="btn btn-primary btn-full" id="btn-salvar-edit-rdv" onclick="salvarEdicaoRDV()" style="margin-top:20px;">
-      💾 SALVAR ALTERAÇÕES
-    </button>
-  </div>
-</div>
 
 <!-- ===== MODAL CADASTRO FUNCIONÁRIO ===== -->
 
@@ -2054,22 +2042,31 @@ async function carregarEstadoRDV() {
 }
 
 function renderHistoricoRDV(snap) {
-const tbody = document.getElementById(‘historico-lista’);
-if (snap.empty) { tbody.innerHTML = ‘<tr><td colspan="8" class="vazio">Nenhum RDV gerado ainda.</td></tr>’; return; }
-tbody.innerHTML = ‘’;
-snap.forEach(doc => {
-const d = doc.data(); const docId = doc.id;
-rdvDataMap[docId] = d;
-const dt = d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString(‘pt-BR’) : ‘–’;
-const saldo = d.saldo || 0;
-const tr = document.createElement(‘tr’);
-tr.innerHTML = ` <td style="font-weight:800;color:var(--azul)">#${d.numero}</td> <td style="font-weight:700">${d.colaborador||'---'}</td> <td>${d.destino||'—'}</td> <td>${d.totalDespesas !== undefined ? fmtBRL(d.totalDespesas) : '—'}</td> <td><span class="badge ${saldo>=0?'badge-ok':'badge-rev'}">${fmtBRL(Math.abs(saldo))}</span></td> <td style="font-size:11px;color:var(--cinza-txt)">${d.criadoPorNome || d.criadoPor || '—'}</td> <td style="font-size:11px;color:var(--cinza-txt)">${dt}</td> <td style="display:flex;gap:4px;flex-wrap:wrap;"> <button class="btn btn-primary btn-sm" data-id="${docId}">VER</button> <button class="btn btn-secondary btn-sm" data-imp="${docId}">🖨️</button> <button class="btn btn-purple btn-sm" data-edit="${docId}">✏️</button> <button class="btn btn-danger btn-sm" data-del="${docId}" data-num="${d.numero}" data-col="${d.colaborador||''}">🗑️</button> </td>`;
-tbody.appendChild(tr);
-tr.querySelector(’[data-id]’).addEventListener(‘click’, () => abrirModalRDV(rdvDataMap[docId]));
-tr.querySelector(’[data-imp]’).addEventListener(‘click’, () => imprimirRDV(docId));
-tr.querySelector(’[data-edit]’).addEventListener(‘click’, () => abrirEdicaoRDV(docId));
-tr.querySelector(’[data-del]’).addEventListener(‘click’, () => apagarRDV(docId, d.numero, d.colaborador));
-});
+  const tbody = document.getElementById('historico-lista');
+  if (snap.empty) { tbody.innerHTML = '<tr><td colspan="7" class="vazio">Nenhum RDV gerado ainda.</td></tr>'; return; }
+  tbody.innerHTML = '';
+  snap.forEach(doc => {
+    const d = doc.data(); const docId = doc.id;
+    rdvDataMap[docId] = d;
+    const dt = d.criadoEm ? new Date(d.criadoEm.toDate()).toLocaleString('pt-BR') : '--';
+    const saldo = d.saldo || 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight:800;color:var(--azul)">#${d.numero}</td>
+      <td style="font-weight:700">${d.colaborador||'---'}</td>
+      <td>${d.destino||'—'}</td>
+      <td>${d.totalDespesas !== undefined ? fmtBRL(d.totalDespesas) : '—'}</td>
+      <td><span class="badge ${saldo>=0?'badge-ok':'badge-rev'}">${fmtBRL(Math.abs(saldo))}</span></td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${d.criadoPorNome || d.criadoPor || '—'}</td>
+      <td style="font-size:11px;color:var(--cinza-txt)">${dt}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-primary btn-sm" data-id="${docId}">VER</button>
+        <button class="btn btn-danger btn-sm" data-del="${docId}" data-num="${d.numero}" data-col="${d.colaborador||''}">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+    tr.querySelector('[data-id]').addEventListener('click', () => abrirModalRDV(rdvDataMap[docId]));
+    tr.querySelector('[data-del]').addEventListener('click', () => apagarRDV(docId, d.numero, d.colaborador));
+  });
 }
 
 function abrirModalRDV(d) {
@@ -2937,166 +2934,7 @@ async function gerarPlanilhaRescisao(id) {
 window.addEventListener('DOMContentLoaded', () => {
   // Init é chamado pelo onAuthStateChanged após login
 });
-// =============================================
-// RDV — EDITAR
-// =============================================
-let rdvEditandoId = null;
-let rdvEditandoData = null;
-
-function abrirEdicaoRDV(docId) {
-const d = rdvDataMap[docId];
-if (!d) { toast(‘⚠️ Dados não encontrados!’, ‘erro’); return; }
-rdvEditandoId = docId;
-rdvEditandoData = d;
-
-document.getElementById(‘edit-rdv-titulo’).textContent = ‘#’ + d.numero + ’ — ’ + (d.colaborador||’’);
-
-const icones = {‘PASSAGENS’:‘✈️’,‘ALIMENTAÇÃO’:‘🍽️’,‘PEDÁGIO’:‘🛣️’,‘HOSPEDAGEM’:‘🏨’,‘COMBUSTIVEL’:‘⛽’,‘TAXI’:‘🚕’,‘ESTACIONAMENTO’:‘🅿️’,‘OUTROS’:‘📦’};
-const cats = [‘PASSAGENS’,‘ALIMENTAÇÃO’,‘PEDÁGIO’,‘HOSPEDAGEM’,‘COMBUSTIVEL’,‘TAXI’,‘ESTACIONAMENTO’,‘OUTROS’];
-
-let html = ‘<div class="form-grid">’;
-html += ‘<div class="form-group"><label class="form-label">Destino</label><input type="text" id="edit-destino" class="form-input" value="' + (d.destino||'') + '"></div>’;
-html += ‘<div class="form-group"><label class="form-label">Motivo</label><input type="text" id="edit-motivo" class="form-input" value="' + (d.motivo||'') + '"></div>’;
-html += ‘<div class="form-group"><label class="form-label">Adiantamento (R$)</label><input type="number" id="edit-adiantamento" class="form-input" value="' + (d.adiantamento||0) + '" oninput="recalcEditSaldo()"></div>’;
-html += ‘</div>’;
-html += ‘<div class="secao-form" style="margin-top:16px;">Despesas por Categoria</div>’;
-html += ‘<div class="form-grid">’;
-cats.forEach(cat => {
-const val = (d.despesasCat && d.despesasCat[cat]) ? d.despesasCat[cat] : 0;
-const catId = ‘edit-cat-’ + cat.replace(/[^A-Za-z]/g,’’);
-html += ‘<div class="form-group"><label class="form-label">’ + (icones[cat]||’’) + ’ ’ + cat + ‘</label>’ +
-‘<input type="number" id="' + catId + '" class="form-input" value="' + val + '" oninput="recalcEditSaldo()"></div>’;
-});
-html += ‘</div>’;
-html += ‘<div style="background:#f0fdf4;border:1.5px solid var(--verde);border-radius:8px;padding:12px 16px;margin-top:14px;display:flex;justify-content:space-between;align-items:center;">’ +
-‘<span style="font-weight:800;color:var(--azul);">💵 NOVO TOTAL / SALDO</span>’ +
-‘<span id="edit-saldo-preview" style="font-weight:900;font-size:14px;color:var(--verde);">—</span></div>’;
-
-document.getElementById(‘edit-rdv-corpo’).innerHTML = html;
-document.getElementById(‘modal-edit-rdv’).classList.add(‘show’);
-recalcEditSaldo();
-}
-
-function recalcEditSaldo() {
-const cats = [‘PASSAGENS’,‘ALIMENTAÇÃO’,‘PEDÁGIO’,‘HOSPEDAGEM’,‘COMBUSTIVEL’,‘TAXI’,‘ESTACIONAMENTO’,‘OUTROS’];
-let total = 0;
-cats.forEach(cat => {
-const el = document.getElementById(‘edit-cat-’ + cat.replace(/[^A-Za-z]/g,’’));
-if (el) total += parseFloat(el.value) || 0;
-});
-const adiant = parseFloat(document.getElementById(‘edit-adiantamento’)?.value) || 0;
-const saldo = total - adiant;
-const el = document.getElementById(‘edit-saldo-preview’);
-if (el) {
-el.textContent = ‘Total: ’ + fmtBRL(total) + ’  |  Saldo: ’ + fmtBRL(Math.abs(saldo)) + (saldo < 0 ? ’ (devolver)’ : ’ (a pagar)’);
-el.style.color = saldo >= 0 ? ‘var(-verde)’ : ‘var(-vermelho)’;
-}
-}
-
-async function salvarEdicaoRDV() {
-if (!rdvEditandoId || !rdvEditandoData) return;
-const btn = document.getElementById(‘btn-salvar-edit-rdv’);
-btn.disabled = true; btn.innerHTML = ‘<span class="spinner"></span> Salvando...’;
-
-const cats = [‘PASSAGENS’,‘ALIMENTAÇÃO’,‘PEDÁGIO’,‘HOSPEDAGEM’,‘COMBUSTIVEL’,‘TAXI’,‘ESTACIONAMENTO’,‘OUTROS’];
-const despesasCat = {};
-let totalDespesas = 0;
-cats.forEach(cat => {
-const el = document.getElementById(‘edit-cat-’ + cat.replace(/[^A-Za-z]/g,’’));
-const val = parseFloat(el?.value) || 0;
-if (val > 0) despesasCat[cat] = val;
-totalDespesas += val;
-});
-
-const adiantamento = parseFloat(document.getElementById(‘edit-adiantamento’)?.value) || 0;
-const saldo = totalDespesas - adiantamento;
-const destino = document.getElementById(‘edit-destino’)?.value || ‘’;
-const motivo  = document.getElementById(‘edit-motivo’)?.value  || ‘’;
-
-try {
-await rdvsRef.doc(rdvEditandoId).update({
-destino, motivo, despesasCat, totalDespesas, adiantamento, saldo,
-editadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-editadoPor: usuarioAtual?.email || ‘—’,
-editadoPorNome: getNomeUsuario(usuarioAtual?.email || ‘’)
-});
-rdvDataMap[rdvEditandoId] = { ...rdvDataMap[rdvEditandoId], destino, motivo, despesasCat, totalDespesas, adiantamento, saldo };
-toast(‘✅ RDV #’ + rdvEditandoData.numero + ’ atualizado!’, ‘sucesso’);
-fecharModal(‘modal-edit-rdv’);
-await carregarEstadoRDV();
-} catch(e) {
-toast(’⚠️ Erro: ’ + e.message, ‘erro’);
-}
-btn.disabled = false; btn.textContent = ‘💾 SALVAR ALTERAÇÕES’;
-}
-
-// =============================================
-// RDV — IMPRIMIR DO HISTÓRICO
-// =============================================
-function imprimirRDV(docId) {
-const d = rdvDataMap[docId];
-if (!d) { toast(‘⚠️ Dados não encontrados!’, ‘erro’); return; }
-
-const f = dbFuncs.find(x => x.nome === d.colaborador) || {};
-const hoje = new Date().toLocaleDateString(‘pt-BR’);
-
-document.getElementById(‘print-area’).style.display = ‘block’;
-document.getElementById(‘f-nome’).value     = d.colaborador || ‘’;
-document.getElementById(‘f-setor’).value    = d.setor || f.setor || ‘’;
-document.getElementById(‘f-ccusto’).value   = f.tipoCc || ‘’;
-document.getElementById(‘f-destino’).value  = d.destino || ‘’;
-document.getElementById(‘f-motivo’).value   = d.motivo  || ‘’;
-document.getElementById(‘f-banco’).value    = f.banco   || ‘’;
-document.getElementById(‘f-ag’).value       = f.agencia || ‘’;
-document.getElementById(‘f-conta’).value    = f.conta   || ‘’;
-document.getElementById(‘f-cpf’).value      = f.cpf     || ‘’;
-document.getElementById(‘f-pix’).value      = f.pix     || ‘’;
-document.getElementById(‘f-tipo’).value     = f.tipo    || ‘cc’;
-document.getElementById(‘data-doc’).value   = hoje;
-document.getElementById(‘f-data-ass’).value = hoje;
-document.getElementById(‘ass-nome’).textContent = d.colaborador || ‘’;
-document.getElementById(‘txt-num-rdv’).textContent = d.numero || ‘—’;
-
-const adiant = d.adiantamento || 0;
-document.getElementById(‘f-adiantamento’).value = ’R$ ’ + adiant.toLocaleString(‘pt-BR’,{minimumFractionDigits:2});
-
-// Limpa tabela e preenche com os totais salvos
-gerarLinhasDespesas();
-
-const cats = [‘PASSAGENS’,‘ALIMENTAÇÃO’,‘ALIMENTAÇÃO’,‘PEDÁGIO’,‘HOSPEDAGEM’,‘COMBUSTIVEL’,‘TAXI’,‘ESTACIONAMENTO’,‘OUTROS’];
-const catMap = {};
-if (d.despesasCat) Object.entries(d.despesasCat).forEach(([k,v]) => { catMap[k] = v; });
-
-const jaPreenchido = {};
-cats.forEach((cat, idx) => {
-if (jaPreenchido[cat]) return;
-jaPreenchido[cat] = true;
-const linhas = document.querySelectorAll(’.linha-despesa[data-idx=”’ + idx + ‘”]’);
-if (linhas.length > 0 && catMap[cat]) {
-const firstInput = linhas[0].querySelector(‘input’);
-if (firstInput) { firstInput.value = catMap[cat]; somarRDV(firstInput); }
-}
-});
-
-atualizarTotalRDV();
-
-const total = d.totalDespesas || 0;
-document.getElementById(‘val-geral’).textContent = total === 0
-? ‘R$\u00a0\u00a0\u00a0\u00a0\u00a0-’
-: ‘R$\u00a0’ + total.toLocaleString(‘pt-BR’,{minimumFractionDigits:2,maximumFractionDigits:2});
-
-const saldo = d.saldo || 0;
-document.getElementById(‘val-saldo’).value = saldo.toLocaleString(‘pt-BR’,{style:‘currency’,currency:‘BRL’});
-
-document.title = ‘RDV_’ + d.numero + ‘_’ + (d.colaborador||’’).replace(/\s+/g,’*’);
-document.body.classList.remove(‘print-baixada’,‘print-rescisao’);
-document.body.classList.add(‘print-rdv’);
-window.print();
-document.body.classList.remove(‘print-rdv’);
-document.getElementById(‘print-area’).style.display = ‘none’;
-}
 </script>
-
 
 </body>
 </html>
